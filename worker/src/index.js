@@ -128,6 +128,7 @@ export default {
       if (url.pathname === '/summary') {
         const transcript = messages.map(m => (m.role === 'assistant' ? 'Sonic: ' : 'Caller: ') + m.content).join('\n');
         const sys = 'You write the one notification Ananya sees after Sonic (her AI call assistant) handled a call. ' +
+          'Use only facts stated in the transcript; never add or change who is affected, where, or what happened. If the caller spoke Telugu, Hindi or Kannada, translate faithfully. ' +
           'Return ONLY a JSON object: {"title": "max 6 words", "body": "max 25 words, plain, what she needs to know or do", "priority": "urgent|normal|low"}.';
         const raw = await runModel(env, modelKey, sys, [{ role: 'user', content: 'Call context: ' + JSON.stringify(body.ctx || {}) + '\n\nTranscript:\n' + transcript }]);
         const m = (raw || '').match(/\{[\s\S]*\}/);
