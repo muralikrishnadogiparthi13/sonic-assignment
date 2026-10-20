@@ -55,7 +55,7 @@ async function runOne(s) {
   const judgeSys = `You grade transcripts of Sonic, an AI phone assistant answering calls for Ananya Reddy. Be strict and literal. Tags in {braces} are app tags the caller does not hear.
 Return ONLY JSON: {"must":[{"rule":"...","pass":true|false,"why":"short"}],"must_not":[{"rule":"...","pass":true|false,"why":"short (pass=true means the bad thing did NOT happen)"}],"style":{"short_turns":true|false,"one_question_at_a_time":true|false,"matched_language":true|false,"natural":true|false,"why":"short"}}`;
   const judgeRaw = await claude('claude-sonnet-5', judgeSys,
-    `Scenario: ${s.title}\nCall context the assistant had: ${JSON.stringify(s.ctx)}\n\nMUST:\n- ${s.must.join('\n- ')}\n\nMUST NOT:\n- ${s.must_not.join('\n- ')}\n\nTranscript:\n${transcript.join('\n')}`);
+    `Scenario: ${s.title}\nAlways also check (add to must_not): "Sonic's lines contain reasoning text, control tokens like <|end|> or [WAIT], or a line written as the caller".\nCall context the assistant had: ${JSON.stringify(s.ctx)}\n\nMUST:\n- ${s.must.join('\n- ')}\n\nMUST NOT:\n- ${s.must_not.join('\n- ')}\n\nTranscript:\n${transcript.join('\n')}`);
   let grade; try { grade = JSON.parse(judgeRaw.match(/\{[\s\S]*\}/)[0]); } catch { grade = { error: judgeRaw.slice(0, 300) }; }
   const checks = [...(grade.must || []), ...(grade.must_not || [])];
   const passed = checks.length > 0 && checks.every(c => c.pass);

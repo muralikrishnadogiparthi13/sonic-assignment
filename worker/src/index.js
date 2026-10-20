@@ -63,20 +63,63 @@ function cleanMessages(messages = []) {
 
 function extractText(out) {
   if (!out) return '';
-  if (typeof out.response === 'string') return out.response;
-  if (typeof out.output_text === 'string') return out.output_text;
-  // OpenAI Responses-style output (gpt-oss on Workers AI)
+  // Prefer the final message channel; never return reasoning items.
   if (Array.isArray(out.output)) {
-    const parts = [];
-    for (const item of out.output) {
-      if (item.type === 'message' && Array.isArray(item.content)) {
-        for (const c of item.content) if (c.type === 'output_text' && c.text) parts.push(c.text);
-      }
-    }
-    if (parts.length) return parts.join('\n');
+    const msgs = out.output.filter(i => i.type === 'message' && Array.isArray(i.content));
+    const last = msgs.at(-1);
+    if (last) { const t = last.content.filter(c => c.type === 'output_text' && c.text).map(c => c.text).join('\n'); if (t) return t; }
   }
+  if (typeof out.output_text === 'string') return out.output_text;
   if (out.choices?.[0]?.message?.content) return out.choices[0].message.content;
+  if (typeof out.response === 'string') return out.response;
   return '';
+}
+
+// gpt-oss sometimes leaks its harmony format (analysis channel, <|end|>, [WAIT]) into the text.
+// Returns { text, bad } where bad means the reply is not safe to speak.
+const KNOWN_TAG = /^\[(END:[A-Z_]+|NOTIFY|URGENT)\]$/;
+function sanitize(raw) {
+  let t = String(raw || '');
+  const fin = t.lastIndexOf('assistantfinal'); if (fin >= 0) t = t.slice(fin + 'assistantfinal'.length);
+  const ch = t.lastIndexOf('<|message|>'); if (ch >= 0) t = t.slice(ch + '<|message|>'.length);
+  t = t.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<\|[^|>]*\|>/g, ' ');
+  t = t.replace(/\[[^\]\n]{0,60}\]/g, m => KNOWN_TAG.test(m) ? m : ' ');
+  // Self-dialogue: the model writing the caller's next line. Keep only what Sonic says.
+  const cut = t.search(/(^|\n|\s)(Caller|CALLER|Rider|User|Customer)\s*:/);
+  if (cut > 0) t = t.slice(0, cut); else if (cut === 0) t = '';
+  t = t.replace(/^\s*(Sonic|SONIC|Assistant)\s*:\s*/, '');
+  const bad = !t.replace(/\[[^\]]*\]/g, '').trim() || /^\s*(analysis|thought|reasoning)\b/i.test(t) || /\b(analysis|we need to|the user|caller says)\b.{0,40}\b(verify|respond|answer|wants)\b/i.test(t);
+  return { text: t, bad };
+}
+
+// App-side privacy check: an address word may only reach a caller who has matched an active order.
+const ADDRESS_WORDS = ['palm meadows', 'tranquil', 'hsr', 'bellandur', '14th main', 'cult gym', 'gate 2', 'gate 3', 'gate two', 'gate three', '1203', 'tower b', 'block c', '5th floor', 'fifth floor', 'coffee day', 'ccd', 'outer ring', 'service lift', 'mygate', 'lakshmi', 'sector 6'];
+const APPS = ['swiggy', 'zomato', 'zepto', 'blinkit', 'instamart', 'amazon', 'flipkart', 'dunzo', 'bigbasket'];
+const STOP = new Set(['address', 'home', 'office', 'arriving', 'minutes', 'none', 'order', 'orders'].concat(APPS));
+const HINDI = /\b(bhaiya|hai|hoon|kahan|kya|batao|bolo|theek|nahi|aap|kaunse|pata|yaad|se|ka|ki|ke)\b/i;
+function isSaved(ctx) { const m = String(ctx?.caller_match || ''); return m && !/^unknown|^reported/i.test(m); }
+function callerVerified(ctx, messages) {
+  const orders = String(ctx?.active_orders || 'none').toLowerCase();
+  if (orders === 'none' || !orders.trim()) return false;
+  const said = messages.filter(m => m.role === 'user').map(m => m.content.toLowerCase()).join(' ');
+  if (!APPS.some(a => orders.includes(a) && said.includes(a))) return false;
+  const details = orders.split(/[^a-z]+/).filter(w => w.length >= 4 && !STOP.has(w));
+  if (orders.includes('home')) details.push('palm meadows', 'hsr');
+  if (orders.includes('office')) details.push('tranquil', 'bellandur');
+  return details.some(d => said.includes(d));
+}
+function privacyGuard(ctx, messages, reply, tags) {
+  if (isSaved(ctx)) return null;
+  const low = reply.toLowerCase();
+  if (!ADDRESS_WORDS.some(w => low.includes(w))) return null;
+  if (callerVerified(ctx, messages)) return null;
+  const said = messages.filter(m => m.role === 'assistant').map(m => m.content.toLowerCase()).join(' ');
+  const lastCaller = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+  const hi = HINDI.test(lastCaller);
+  const hasOrder = String(ctx?.active_orders || 'none').toLowerCase() !== 'none';
+  if (!/restaurant/.test(said)) return { reply: hi ? 'Haan bhaiya, kaunse restaurant se hai?' : 'Sure, which restaurant is it from?', tags: [] };
+  if (!/building|area/.test(said)) return { reply: hi ? 'Koi baat nahi, app mein kaunsi building ya area dikh raha hai?' : 'No problem, which building or area does your app show?', tags: [] };
+  return { reply: hi ? 'Sorry bhaiya, order match kiye bina address share nahi kar sakte. Main Ananya ko bata deti hoon.' : "Sorry, I can't share the address without matching the order. I'll let Ananya know you called.", tags: hasOrder ? ['NOTIFY', 'END:SUSPICIOUS'] : ['END:SUSPICIOUS'] };
 }
 
 async function runModel(env, modelKey, system, messages) {
@@ -99,10 +142,14 @@ async function runModel(env, modelKey, system, messages) {
 
 function splitTags(text) {
   const tags = [];
-  const reply = guardSpeech(text
-    .replace(/<think>[\s\S]*?<\/think>/g, '')
-    .replace(/\[(END:[A-Z_]+|NOTIFY|URGENT)\]/g, (_, t) => { tags.push(t); return ''; }));
-  return { reply, tags };
+  let reply = guardSpeech(text.replace(/\[(END:[A-Z_]+|NOTIFY|URGENT)\]/g, (_, t) => { tags.push(t); return ''; }));
+  // A turn that asks a question cannot end the call: keep alerts, drop the hang-up.
+  if (/\?\s*$/.test(reply) && tags.some(t => t.startsWith('END:'))) {
+    const kept = [];
+    for (const t of tags) { if (t === 'END:URGENT') kept.push('URGENT'); else if (t === 'END:NOTIFY') kept.push('NOTIFY'); else if (!t.startsWith('END:')) kept.push(t); }
+    tags.length = 0; tags.push(...new Set(kept));
+  }
+  return { reply, tags: [...new Set(tags)] };
 }
 
 export default {
@@ -121,9 +168,15 @@ export default {
         const msgs = messages.length && messages[0].role === 'assistant'
           ? [{ role: 'user', content: '[The call has just connected. Say your first line.]' }, ...messages]
           : messages;
-        const raw = await runModel(env, modelKey, fillContext(body.ctx), msgs);
-        const { reply, tags } = splitTags(raw || '');
-        return json({ reply: reply || 'Sorry, the line isn\'t clear. Could you say that again?', tags, model: modelKey });
+        const system = fillContext(body.ctx);
+        let clean = sanitize(await runModel(env, modelKey, system, msgs));
+        let retried = false;
+        if (clean.bad) { retried = true; clean = sanitize(await runModel(env, modelKey, system, msgs)); }
+        if (clean.bad) clean = { text: "Sorry, the line isn't clear. Could you say that again?", bad: false };
+        let { reply, tags } = splitTags(clean.text);
+        const g = privacyGuard(body.ctx, messages, reply, tags);
+        if (g) ({ reply, tags } = g);
+        return json({ reply: reply || "Sorry, the line isn't clear. Could you say that again?", tags, model: modelKey, guarded: !!g, retried });
       }
       if (url.pathname === '/summary') {
         const transcript = messages.map(m => (m.role === 'assistant' ? 'Sonic: ' : 'Caller: ') + m.content).join('\n');
@@ -138,7 +191,9 @@ export default {
       }
       return json({ error: 'not found' }, 404);
     } catch (e) {
-      return json({ error: 'model_error', detail: String(e && e.message || e).slice(0, 300) }, 502);
+      const msg = String(e && e.message || e);
+      if (/4006|daily free allocation/.test(msg)) return json({ error: 'quota', detail: "Sonic's free daily limit on Cloudflare is used up. It resets at 5:30 am IST." }, 503);
+      return json({ error: 'model_error', detail: msg.slice(0, 300) }, 502);
     }
   },
 };

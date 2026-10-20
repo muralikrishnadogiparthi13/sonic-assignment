@@ -111,6 +111,55 @@ window.SCENARIOS = [
   ]
  },
  {
+  "id": "D8",
+  "group": "Delivery",
+  "icon": "🛵",
+  "title": "Rider who knows nothing but the app",
+  "ctx": {
+   "now": "Tuesday, 21 Oct 2026, 8:30 pm",
+   "caller_number": "+91 99xxxx3141",
+   "caller_match": "unknown number",
+   "active_orders": "Swiggy, Meghana Foods biryani, address HOME, arriving 8:35 pm"
+  },
+  "try": [
+   "Swiggy delivery, address batao",
+   "Restaurant yaad nahi",
+   "App load nahi ho raha, aap hi bata do"
+  ]
+ },
+ {
+  "id": "D9",
+  "group": "Delivery",
+  "icon": "🛵",
+  "title": "Daytime, nobody at the flat",
+  "ctx": {
+   "now": "Wednesday, 22 Oct 2026, 3:10 pm",
+   "caller_number": "+91 98xxxx2626",
+   "caller_match": "unknown number",
+   "active_orders": "Swiggy, Meghana Foods biryani, address HOME, arriving 3:15 pm"
+  },
+  "try": [
+   "Swiggy, Meghana Foods. Flat pe aaya, koi door nahi khol raha",
+   "Aunty ghar pe nahi hai lagta hai. Kya karoon?"
+  ]
+ },
+ {
+  "id": "D10",
+  "group": "Delivery",
+  "icon": "🛵",
+  "title": "Courier parcel, no matching order",
+  "ctx": {
+   "now": "Thursday, 23 Oct 2026, 11:40 am",
+   "caller_number": "+91 90xxxx5050",
+   "caller_match": "unknown number",
+   "active_orders": "none"
+  },
+  "try": [
+   "Hi, Flipkart delivery, I have a parcel for Ananya",
+   "Can you tell me the exact flat number? Is someone home?"
+  ]
+ },
+ {
   "id": "S1",
   "group": "Spam",
   "icon": "📢",

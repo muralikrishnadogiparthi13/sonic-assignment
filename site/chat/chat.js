@@ -8,7 +8,7 @@ const FLAG_TEXT = {
   URGENT: '🚨 Urgent alert sent to Ananya', NOTIFY: '🔔 Ananya notified (needs her action)',
   'END:URGENT': '🚨 Ended: urgent, Ananya alerted', 'END:NOTIFY': '🔔 Ended: Ananya needs to act',
   'END:MESSAGE': '📝 Ended: message taken', 'END:DELIVERY_DONE': '🛵 Ended: delivery guided',
-  'END:SPAM': '📢 Ended: spam', 'END:SCAM': '🚨 Ended: scam attempt, suggest block',
+  'END:SPAM': '📢 Ended: spam', 'END:SCAM': '🚨 Ended: scam attempt, nothing shared',
   'END:SUSPICIOUS': '🕵️ Ended: unverified caller, nothing shared', 'END:WRONG_NUMBER': '↩️ Ended: wrong number',
 };
 
@@ -89,7 +89,8 @@ async function agentTurn() {
   } catch (e) {
     typing.remove();
     const el = document.createElement('div'); el.className = 'err';
-    el.textContent = 'Sonic could not reply (' + String(e.message || e).slice(0, 120) + '). Press Send again to retry.';
+    const m = String(e.message || e);
+    el.textContent = /free daily limit/.test(m) ? m : 'Sonic could not reply (' + m.slice(0, 120) + '). Press Send again to retry.';
     feed.appendChild(el); scroll();
   } finally { busy = false; setInputs(); }
 }

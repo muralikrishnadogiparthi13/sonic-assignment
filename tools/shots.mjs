@@ -13,11 +13,11 @@ async function phoneShot(name) {
   fs.writeFileSync(out + name + '.png', Buffer.from(s.result.data, 'base64'));
 }
 const steps = ['welcome', 'what', 'choose', 'phone', 'perms', 'forward', 'test', 'test_ok', 'live'];
-for (const st of steps) { await b.goto(base + '?step=' + st); await b.eval('document.fonts.ready'); await phoneShot('android_' + st); }
+for (const st of steps) { await b.goto(base + '?os=android&lang=en&step=' + st); await b.eval('document.fonts.ready'); await phoneShot('android_' + st); }
 await b.goto(base + '?os=ios&step=voicemail'); await phoneShot('ios_voicemail');
 await b.goto(base + '?os=ios&step=forward'); await phoneShot('ios_forward');
 await b.goto(base + '?os=ios&step=voicemail'); await b.click('[data-act=open-settings]'); await phoneShot('ios_settings');
-await b.goto(base + '?step=forward'); await b.click('[data-act=open-dialer]'); await b.click('#dial'); await b.sleep(1600); await phoneShot('android_carrier');
+await b.goto(base + '?os=android&step=forward'); await b.click('[data-act=open-dialer]'); await b.click('#dial'); await b.sleep(1600); await phoneShot('android_carrier');
 await b.goto(base + '?step=test'); await b.click('[data-act=call-me]'); await b.sleep(1500); await phoneShot('android_incoming');
 console.log(fs.readdirSync(out).join(' '));
 b.close();
