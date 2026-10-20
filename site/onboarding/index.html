@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonic onboarding prototype</title>
+<meta name="description" content="Clickable onboarding prototype for Sonic, an AI call assistant. Supernova AI APM assignment, Part A.">
+<meta property="og:title" content="Sonic onboarding prototype">
+<meta property="og:description" content="From first screen to 'Sonic is live': explain, choose calls, permissions, voicemail, call forwarding, test call.">
+<link rel="icon" href="../assets/sonic-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../"><img src="../assets/sonic-icon.svg" alt="" width="26" height="26"> Sonic <span>onboarding prototype</span></a>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Phone">
+      <button data-os="android" class="on">Android</button><button data-os="ios">iPhone</button>
+    </div>
+    <div class="seg" role="group" aria-label="Language">
+      <button data-lang="en" class="on">English</button><button data-lang="hi">Hinglish</button>
+    </div>
+    <button class="ghost" id="restart">Restart</button>
+    <button class="ghost" id="toggleNotes">Hide notes</button>
+  </div>
+</header>
+
+<main class="stage">
+  <div class="phone-wrap">
+    <div class="phone" id="phone">
+      <div class="statusbar"><span id="clock">9:41</span><span class="sb-right"><i class="sig"></i><i class="bat"></i></span></div>
+      <div class="screen" id="screen"></div>
+      <div class="sheet-backdrop" id="sheetBackdrop"></div>
+      <div class="sheet" id="sheet"></div>
+      <div class="toast" id="toast"></div>
+    </div>
+    <p class="hint" id="hint">Tap through like a real user. Buttons and toggles work.</p>
+  </div>
+  <aside class="notes" id="notes" aria-live="polite">
+    <div class="notes-head">Why this screen</div>
+    <div id="notesBody"></div>
+    <div class="flowmap" id="flowmap"></div>
+  </aside>
+</main>
+
+<script src="copy.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

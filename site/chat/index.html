@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonic call agent</title>
+<meta name="description" content="Talk to Sonic, Ananya's AI call assistant. You play the caller. Supernova AI APM assignment, Part B.">
+<link rel="icon" href="../assets/sonic-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="chat.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="../"><img src="../assets/sonic-icon.svg" alt="" width="26" height="26"> Sonic <span>call agent · you are the caller</span></a>
+  <div class="controls">
+    <a class="ghost" href="../prompt/" target="_blank" rel="noopener">Read the prompt</a>
+    <button class="ghost" id="personaBtn">Who is Ananya?</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <aside class="setup">
+    <section>
+      <h2>1. Pick a call</h2>
+      <p class="sub">Each one sets up the call the way the app would see it. Or build your own below.</p>
+      <div class="scenarios" id="scenarios"></div>
+    </section>
+    <section>
+      <h2>2. What Sonic knows about this call</h2>
+      <label>Caller ID match
+        <select id="ctxCaller">
+          <option value="unknown number">Unknown number</option>
+          <option value="Lakshmi (Amma), mother">Saved contact: Amma (mother)</option>
+          <option value="Ravi (Appa), father">Saved contact: Appa (father)</option>
+          <option value="Rohan, younger brother">Saved contact: Rohan (brother)</option>
+          <option value="Meera, best friend">Saved contact: Meera (best friend)</option>
+          <option value="Neha Kapoor, manager (work)">Saved contact: Neha (manager)</option>
+          <option value="reported as spam by 1,240 users">Reported as spam by 1,240 users</option>
+        </select>
+      </label>
+      <label>Active food orders
+        <select id="ctxOrders">
+          <option value="none">None</option>
+          <option value="Swiggy, Meghana Foods biryani, address HOME, arriving in 5 min">Swiggy · Meghana Foods → Home</option>
+          <option value="Zomato, Truffles burger, address OFFICE, arriving in 5 min">Zomato · Truffles → Office</option>
+          <option value="1) Zepto groceries, address HOME, arriving in 10 min; 2) Swiggy, Third Wave Coffee, address OFFICE, arriving in 5 min">Two orders: Zepto → Home, Swiggy → Office</option>
+        </select>
+      </label>
+      <label>Time of the call
+        <select id="ctxTime">
+          <option value="now">Right now</option>
+          <option value="Wednesday, 1:15 pm">Weekday, 1:15 pm (office hours)</option>
+          <option value="Saturday, 8:40 pm">Saturday, 8:40 pm</option>
+          <option value="Friday, 11:20 pm">Friday, 11:20 pm (after 10 pm rule)</option>
+        </select>
+      </label>
+      <label class="row-check"><input type="checkbox" id="speak"> Read Sonic's replies out loud</label>
+      <button class="cta" id="startBtn">Start call</button>
+    </section>
+  </aside>
+
+  <section class="callpane">
+    <div class="callhead">
+      <div class="avatar" id="callerAvatar">?</div>
+      <div class="who">
+        <b id="callerName">No call yet</b>
+        <span id="callerMeta">Pick a call on the left, then press Start call</span>
+      </div>
+      <div class="timer" id="timer"></div>
+      <button class="endbtn" id="endBtn" disabled title="End call">End</button>
+    </div>
+    <div class="feed" id="feed">
+      <div class="empty">
+        <img src="../assets/sonic-icon.svg" width="56" height="56" alt="">
+        <h3>You are the caller</h3>
+        <p>Sonic speaks first, like a real call. Reply as a delivery rider, a spam caller, family, or anyone. Try to break it.</p>
+      </div>
+    </div>
+    <div class="trysay" id="trysay"></div>
+    <form class="composer" id="composer">
+      <button type="button" class="mic" id="micBtn" title="Speak (Chrome)" aria-label="Speak">🎙️</button>
+      <input id="input" autocomplete="off" placeholder="Say something as the caller..." disabled>
+      <button class="send" id="sendBtn" disabled>Send</button>
+    </form>
+  </section>
+
+  <aside class="outcome">
+    <h2>What Ananya sees</h2>
+    <p class="sub">After the call ends, Sonic sends her one short notification.</p>
+    <div id="summary" class="summary muted">No call yet.</div>
+    <h2 style="margin-top:22px">Live flags</h2>
+    <p class="sub">Tags Sonic adds for the app. Callers never hear these.</p>
+    <div id="flags" class="flags"></div>
+  </aside>
+</main>
+
+<div class="modal" id="persona" hidden>
+  <div class="mbox">
+    <button class="x" id="personaClose" aria-label="Close">×</button>
+    <h2>Ananya Reddy, the user</h2>
+    <p class="sub">Made up for this assignment. Sonic only knows what's below.</p>
+    <div class="pgrid">
+      <div class="pcard"><h3>🏠 Home · HSR Layout</h3><p>Flat 1203, Tower B, Palm Meadows Residency, 14th Main, Sector 6. Opp. Cult gym, Gate 2. MyGate at the gate.</p><p><b>8 am–10 pm:</b> hand to Amma (Lakshmi) at the flat. <b>After 10 pm:</b> leave with the guard.</p></div>
+      <div class="pcard"><h3>🏢 Office · Bellandur</h3><p>Tranquil Tech Park, Block C, 5th floor, ORR. Next to CCD. Bikes use Gate 3 only.</p><p>Delivery stops at Block C reception shelf. She comes down.</p></div>
+      <div class="pcard"><h3>👨‍👩‍👦 Known people</h3><p>Amma (lives with her), Appa (Vijayawada), Rohan (brother, Pune), Meera (best friend), Neha Kapoor (manager).</p></div>
+      <div class="pcard"><h3>🔒 Never shared</h3><p>Addresses (except to the rider of a matching order), whether she's home, schedule, OTPs, bank or ID details, what other callers said.</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="scenarios.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonic agent prompt</title>
+<meta name="description" content="The full system prompt for Sonic, Ananya's AI call assistant. Supernova AI APM assignment, Part B.">
+<link rel="icon" href="../assets/sonic-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBFAF6;--ink:#16161A;--muted:#5b6170;--line:#E7E3EF;--purple:#8551FF;--lav:#EDE6FF;--cream:#FBE8B6}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Onest',system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px 60px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:10px;flex-wrap:wrap}
+.brand{display:flex;gap:8px;align-items:center;font-weight:800;font-size:18px;text-decoration:none;color:inherit}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid #d4cfe6;background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:13.5px;color:var(--ink);text-decoration:none;cursor:pointer;font-family:inherit}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.intro{background:var(--lav);border-radius:22px;padding:18px 20px;margin:6px 0 22px}
+.intro h1{margin:0 0 6px;font-size:28px;line-height:1.15}
+.intro p{margin:0 0 6px;color:#3b3f4a}
+.diagram{background:#F4F1FF;border-radius:20px;padding:8px;overflow-x:auto;margin-bottom:24px}
+.diagram img{display:block;width:100%;min-width:720px}
+#doc h1{font-size:26px;margin:30px 0 8px}
+#doc h2{font-size:20px;margin:30px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+#doc h3{font-size:16px}
+#doc p,#doc li{font-size:15.5px}
+#doc blockquote{margin:0;background:var(--cream);border-radius:14px;padding:10px 14px;color:#3B2E0C}
+#doc blockquote p{margin:4px 0}
+#doc code{background:#F1ECFF;color:#4a2ca8;border-radius:6px;padding:1px 6px;font-size:.92em}
+#doc pre{background:#16161A;color:#eee;border-radius:14px;padding:14px;overflow-x:auto}
+#doc pre code{background:none;color:inherit;padding:0}
+#doc table{border-collapse:collapse;width:100%;font-size:14.5px;margin:10px 0}
+#doc th,#doc td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+#doc hr{border:0;border-top:1px dashed #d4cfe6;margin:26px 0}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:999px;font-weight:600;opacity:0;transition:opacity .2s}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="../"><img src="../assets/sonic-icon.svg" width="26" height="26" alt=""> Sonic</a>
+    <div class="btns">
+      <button class="btn" id="copy">Copy prompt</button>
+      <a class="btn" href="sonic_system_prompt.md" download>Download .md</a>
+      <a class="btn" href="../evals/">Test results</a>
+      <a class="btn dark" href="../chat/">Try it live →</a>
+    </div>
+  </nav>
+  <div class="intro">
+    <h1>Sonic's system prompt</h1>
+    <p>This is the exact prompt the live chat runs on. The app fills in the CALL CONTEXT block at the bottom for each call: who's calling, any active orders, and the delivery rule for the current time.</p>
+    <p>Written for speech: short turns, one question at a time, no lists, and a tag at the end so the app knows what happened.</p>
+  </div>
+  <div class="diagram"><img src="../assets/call-flow.svg" alt="How Sonic handles a call"></div>
+  <article id="doc">Loading prompt...</article>
+</div>
+<div class="toast" id="toast">Copied</div>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script>
+let raw = '';
+fetch('sonic_system_prompt.md').then(r => r.text()).then(t => {
+  raw = t;
+  document.getElementById('doc').innerHTML = window.marked ? marked.parse(t) : '<pre>' + t.replace(/</g, '&lt;') + '</pre>';
+}).catch(() => { document.getElementById('doc').textContent = 'Could not load the prompt. Use the download button above.'; });
+document.getElementById('copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(raw); } catch (e) {}
+  const t = document.getElementById('toast'); t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 1400);
+};
+</script>
+</body>
+</html>

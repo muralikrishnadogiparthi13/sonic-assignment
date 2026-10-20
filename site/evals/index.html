@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonic test calls</title>
+<meta name="description" content="24 scripted test calls against Sonic's prompt, graded against written pass/fail rules.">
+<link rel="icon" href="../assets/sonic-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBFAF6;--ink:#16161A;--muted:#5b6170;--line:#E7E3EF;--purple:#8551FF;--green:#22C35E;--red:#FF5A5F;--coral:#F58C7E;--lav:#EDE6FF;--cream:#FBE8B6}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Onest',system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px 60px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:10px;flex-wrap:wrap}
+.brand{display:flex;gap:8px;align-items:center;font-weight:800;font-size:18px;text-decoration:none;color:inherit}
+.btn{border:1px solid #d4cfe6;background:#fff;border-radius:999px;padding:8px 14px;font-weight:700;font-size:13.5px;color:var(--ink);text-decoration:none}
+h1{font-size:30px;margin:6px 0 6px}
+.sub{color:var(--muted);margin:0 0 18px;max-width:760px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.how div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;font-size:14px;color:#3b3f4a}
+.how b{display:block;color:var(--ink);font-size:15px;margin-bottom:3px}
+.hist{display:flex;align-items:flex-end;gap:14px;background:var(--lav);border-radius:20px;padding:18px 18px 12px;margin-bottom:10px;overflow-x:auto}
+.bar{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:70px}
+.bar i{display:block;width:44px;background:var(--purple);border-radius:10px 10px 4px 4px}
+.bar b{font-size:15px}.bar span{font-size:12px;color:#5b5670}
+.learn{background:var(--cream);border-radius:18px;padding:14px 18px;margin:16px 0 26px;color:#3B2E0C}
+.learn ul{margin:6px 0 0;padding-left:18px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid #d4cfe6;background:#fff;border-radius:999px;padding:6px 12px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}
+.filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+details{background:#fff;border:1px solid var(--line);border-radius:18px;margin-bottom:10px;overflow:hidden}
+summary{list-style:none;cursor:pointer;padding:12px 16px;display:flex;gap:12px;align-items:center}
+summary::-webkit-details-marker{display:none}
+.pill{font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;color:#fff;flex:none}
+.pill.p{background:var(--green)}.pill.f{background:var(--red)}
+.sid{font-weight:800;color:#8a84a3;font-size:13px;width:28px;flex:none}
+.stitle{flex:1;font-weight:600}
+.score{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13.5px}
+.body{padding:0 16px 16px;display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+.tx{background:#16161A;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.m{max-width:88%;padding:7px 11px;border-radius:14px;font-size:13.5px;line-height:1.4}
+.m.s{background:var(--purple);color:#fff;align-self:flex-start}
+.m.c{background:var(--coral);color:#2b0f0b;align-self:flex-end}
+.m small{display:block;font-size:10.5px;font-weight:800;opacity:.75;text-transform:uppercase}
+.tagc{align-self:flex-start;font-size:11.5px;color:#C9B6FF;border:1px dashed #6a5aa8;border-radius:999px;padding:3px 9px}
+.checks{font-size:13.5px}
+.checks .k{display:flex;gap:8px;margin-bottom:7px}
+.checks .k i{font-style:normal;flex:none}
+.checks .why{color:var(--muted);font-size:12.5px}
+.ctx{font-size:12.5px;color:var(--muted);background:#faf9fe;border-radius:12px;padding:8px 10px;margin-bottom:10px}
+.try{display:inline-block;margin-top:8px;font-weight:700;font-size:13px;color:var(--purple)}
+@media (max-width:760px){.how{grid-template-columns:1fr}.body{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="../"><img src="../assets/sonic-icon.svg" width="26" height="26" alt=""> Sonic</a>
+    <div style="display:flex;gap:8px"><a class="btn" href="../prompt/">Prompt</a><a class="btn" href="../chat/">Try it live →</a></div>
+  </nav>
+  <h1>24 test calls</h1>
+  <p class="sub">I didn't want to judge the prompt by vibes, so every version was run against the same 24 calls before I changed anything else.</p>
+  <div class="how">
+    <div><b>Sonic</b>The deployed agent: same prompt and model as the live chat.</div>
+    <div><b>The caller</b>Claude plays each caller from a short brief (a lost rider, a KYC scammer, Amma, a fake "brother"), pushing like a real one would.</div>
+    <div><b>The judge</b>A separate Claude call grades each transcript against written must / must-not rules, plus style (short turns, one question, language match).</div>
+  </div>
+  <div class="hist" id="hist"></div>
+  <div class="learn" id="learn"><b>What the failures taught me</b>
+    <ul>
+      <li>The model got the 10 pm handover rule wrong, so the app now passes the current rule in as a fact.</li>
+      <li>Strict "name the restaurant" checks turned real riders away. Now it's app match + any one detail they already know.</li>
+      <li>One scam call got a markdown essay back. A small output guard now strips formatting and caps length for speech.</li>
+      <li>The model copied a line from an example call, so examples are now clearly marked as separate calls.</li>
+    </ul>
+  </div>
+  <h2 style="margin:0 0 8px">Latest run, call by call</h2>
+  <div class="filters" id="filters"></div>
+  <div id="list">Loading...</div>
+</div>
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+fetch('data.json').then(r => r.json()).then(({ history, latest }) => {
+  const max = Math.max(...history.map(h => h.total));
+  document.getElementById('hist').innerHTML = history.map(h => `<div class="bar"><b>${h.passed}/${h.total}</b><i style="height:${Math.round(h.passed / max * 120)}px"></i><span>Run ${h.run}</span></div>`).join('');
+  const groups = ['All', 'Failed', ...new Set(latest.map(r => r.group))];
+  let cur = 'All';
+  const f = document.getElementById('filters');
+  f.innerHTML = groups.map(g => `<button data-g="${g}" class="${g === cur ? 'on' : ''}">${g}</button>`).join('');
+  f.onclick = e => { const b = e.target.closest('button'); if (!b) return; cur = b.dataset.g; [...f.children].forEach(x => x.classList.toggle('on', x === b)); draw(); };
+  function draw() {
+    const rows = latest.filter(r => cur === 'All' || (cur === 'Failed' ? !r.passed : r.group === cur));
+    document.getElementById('list').innerHTML = rows.map(r => {
+      const tx = (r.transcript || []).map(l => {
+        const m = l.match(/^(SONIC|CALLER): ([\s\S]*?)(?:\s+\{([^}]*)\})?$/);
+        if (!m) return '';
+        const who = m[1] === 'SONIC' ? 's' : 'c';
+        return `<div class="m ${who}"><small>${who === 's' ? 'Sonic' : 'Caller'}</small>${esc(m[2])}</div>${m[3] ? `<div class="tagc">${esc(m[3])}</div>` : ''}`;
+      }).join('');
+      const g = r.grade || {};
+      const checks = [...(g.must || []).map(c => ({ ...c, kind: 'Must' })), ...(g.must_not || []).map(c => ({ ...c, kind: 'Must not' }))]
+        .map(c => `<div class="k"><i>${c.pass ? '✅' : '❌'}</i><div><b>${c.kind}:</b> ${esc(c.rule)}<div class="why">${esc(c.why)}</div></div></div>`).join('');
+      const ctx = r.ctx || {};
+      return `<details${r.passed ? '' : ' open'}><summary><span class="sid">${r.id}</span><span class="pill ${r.passed ? 'p' : 'f'}">${r.passed ? 'PASS' : 'FAIL'}</span><span class="stitle">${esc(r.title)}</span><span class="score">${r.score || ''}</span></summary>
+        <div class="body"><div class="tx">${tx}</div><div>
+          <div class="ctx"><b>Context:</b> ${esc(ctx.caller_match)} · ${esc(ctx.now)} · orders: ${esc(ctx.active_orders)}</div>
+          <div class="checks">${checks}</div>
+          ${g.style?.why ? `<div class="ctx" style="margin-top:8px"><b>Style:</b> ${esc(g.style.why)}</div>` : ''}
+          <a class="try" href="../chat/?s=${r.id}">Try this call yourself →</a>
+        </div></div></details>`;
+    }).join('');
+  }
+  draw();
+});
+</script>
+</body>
+</html>

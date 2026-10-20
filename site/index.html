@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonic · AI APM assignment</title>
+<meta name="description" content="Sonic, an AI call assistant: onboarding prototype (Part A) and call agent prompt with a live chat (Part B). By Murali Krishna Dogiparthi.">
+<meta property="og:title" content="Sonic · AI APM assignment · Murali Krishna">
+<meta property="og:description" content="Onboarding prototype, call agent prompt, live chat, and 24 test calls.">
+<meta property="og:image" content="assets/screens/android_welcome.jpg">
+<link rel="icon" href="assets/sonic-icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBFAF6;--ink:#16161A;--muted:#5b6170;--line:#E7E3EF;--purple:#8551FF;--green:#22C35E;--green-d:#18A04B;--amber:#F6B726;--cream:#FBE8B6;--coral:#F58C7E;--mint:#DDF3E4;--peach:#FFE9D6;--lav:#EDE6FF;--butter:#FFF4CF}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Onest',system-ui,sans-serif;line-height:1.5}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.brand{display:flex;gap:8px;align-items:center;font-weight:800;font-size:18px;text-decoration:none}
+nav .who{color:var(--muted);font-size:14px}
+.hero{padding:36px 0 26px}
+.kick{display:inline-block;background:var(--lav);color:#4a2ca8;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px}
+h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:14px 0 14px;letter-spacing:-.02em;font-weight:800}
+h1 .mark{background:linear-gradient(transparent 62%,rgba(133,81,255,.35) 62%)}
+.lede{font-size:18px;color:#3b3f4a;max-width:720px;margin:0}
+.parts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:30px 0 10px}
+.part{border-radius:26px;padding:20px 20px 0;display:flex;flex-direction:column;text-decoration:none;overflow:hidden;border:1px solid rgba(0,0,0,.04);transition:transform .15s}
+.part:hover{transform:translateY(-3px)}
+.part .tag{font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;opacity:.7}
+.part h2{margin:4px 0 6px;font-size:22px;line-height:1.15}
+.part p{margin:0 0 14px;font-size:14.5px;color:#3b3f4a}
+.part .go{display:inline-flex;align-self:flex-start;background:var(--ink);color:#fff;border-radius:999px;padding:9px 16px;font-weight:700;font-size:14px;margin-bottom:16px}
+.part img{display:block;width:78%;margin:auto auto 0;border-radius:22px 22px 0 0;box-shadow:0 -4px 30px rgba(0,0,0,.12)}
+.p1{background:var(--mint)}.p2{background:var(--peach)}.p3{background:var(--lav)}
+.p3 .mini{background:#fff;border-radius:18px 18px 0 0;padding:14px;margin-top:auto;font-size:13px}
+.mini .r{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0edf6}
+.mini .r:last-child{border:0}
+.mini b{font-variant-numeric:tabular-nums}
+section{padding:34px 0;border-top:1px solid var(--line)}
+section h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+section .sub{color:var(--muted);margin:0 0 18px;max-width:760px}
+.diagram{background:#F4F1FF;border-radius:22px;padding:10px;overflow-x:auto}
+.diagram img{display:block;width:100%;min-width:760px}
+.strip{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x mandatory}
+.strip figure{margin:0;flex:none;width:190px;scroll-snap-align:start}
+.strip img{width:100%;border-radius:22px;display:block;border:1px solid #e8e5ef}
+.strip figcaption{font-size:12.5px;color:#3b3f4a;margin-top:8px;line-height:1.35}
+.strip figcaption b{display:block;font-size:13px;color:var(--ink)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px 18px}
+.card h3{margin:0 0 6px;font-size:16.5px}
+.card p{margin:0;color:#3b3f4a;font-size:14.5px}
+.decisions{counter-reset:d}
+.decisions .card{position:relative;padding-left:56px}
+.decisions .card::before{counter-increment:d;content:counter(d);position:absolute;left:16px;top:16px;width:28px;height:28px;border-radius:50%;background:var(--amber);color:#3B2E0C;font-weight:800;display:grid;place-items:center;font-size:14px}
+ul.plain{margin:0;padding-left:18px}
+ul.plain li{margin-bottom:8px;color:#3b3f4a}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px}
+.metric b{display:block;font-size:15px;margin-bottom:4px}
+.metric span{font-size:13.5px;color:#3b3f4a}
+.metric.top{background:var(--butter);border-color:#f1e1a6}
+footer{padding:30px 0 50px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+@media (max-width:860px){.parts{grid-template-columns:1fr}.cols{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="./"><img src="assets/sonic-icon.svg" width="28" height="28" alt=""> Sonic</a>
+    <span class="who">AI APM assignment · Murali Krishna Dogiparthi</span>
+  </nav>
+
+  <header class="hero">
+    <span class="kick">Supernova · AI APM assignment</span>
+    <h1>Calls you can't take,<br><span class="mark">Sonic picks up.</span></h1>
+    <p class="lede">Two parts. An onboarding that takes a nervous first-time user to "Sonic is live" in about two minutes, and a call agent that guides delivery riders, shuts down spam and scams, and knows when to wake Ananya up.</p>
+  </header>
+
+  <div class="parts">
+    <a class="part p1" href="onboarding/">
+      <span class="tag">Part A</span>
+      <h2>Onboarding prototype</h2>
+      <p>Clickable. Android and iPhone flows, English and Hinglish, explainer with voiceover, and a note beside every screen on why it's built that way.</p>
+      <span class="go">Open prototype →</span>
+      <img src="assets/screens/android_welcome.jpg" alt="Sonic welcome screen" loading="lazy">
+    </a>
+    <a class="part p2" href="chat/">
+      <span class="tag">Part B</span>
+      <h2>Talk to Sonic</h2>
+      <p>You play the caller: rider, spam caller, family, anyone. Pick one of 24 ready-made calls or set up your own. Sonic speaks first.</p>
+      <span class="go">Start a call →</span>
+      <img src="assets/screens/android_test_ok.jpg" alt="Sonic speaking to a caller" loading="lazy">
+    </a>
+    <div class="part p3">
+      <span class="tag">Part B</span>
+      <h2>The prompt, and how I tested it</h2>
+      <p>The full system prompt (also as a .md file), plus 24 scripted test calls graded against written pass/fail rules.</p>
+      <a class="go" href="prompt/" style="text-decoration:none">Read the prompt →</a>
+      <div class="mini" id="evalMini">
+        <div class="r"><span>Run 1, first prompt</span><b>15/24</b></div>
+        <div class="r"><span>Run 2, app computes rules</span><b>20/24</b></div>
+        <div class="r"><span>Run 4, ladder + urgency fix</span><b>21/24</b></div>
+        <div class="r"><span><a href="evals/">See every transcript</a></span><b>→</b></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>How Sonic handles a call</h2>
+    <p class="sub">The app does the lookups (who's calling, which order is active, is it past 10 pm). The model does the talking. Every call ends with exactly one outcome, which becomes the one notification Ananya sees.</p>
+    <div class="diagram"><img src="assets/call-flow.svg" alt="Decision flow: call forwarded, app adds context, Sonic greets, then delivery, spam, scam, family or unknown branches, each ending in one outcome tag"></div>
+  </section>
+
+  <section>
+    <h2>The onboarding, screen by screen</h2>
+    <p class="sub">Four real setup steps on Android, five on iPhone. Each worry gets answered on the screen where it comes up, not in an FAQ.</p>
+    <div class="strip">
+      <figure><img src="assets/screens/android_welcome.jpg" alt="" loading="lazy"><figcaption><b>1 · Welcome</b>Outcome first, 40 sec explainer with voiceover, "never pretends to be you" under the button.</figcaption></figure>
+      <figure><img src="assets/screens/android_what.jpg" alt="" loading="lazy"><figcaption><b>2 · What it handles</b>One mini call per call type. Worries as tap-to-open chips.</figcaption></figure>
+      <figure><img src="assets/screens/android_choose.jpg" alt="" loading="lazy"><figcaption><b>3 · Which calls</b>Unknown-only by default. "Your phone still rings first" on both options.</figcaption></figure>
+      <figure><img src="assets/screens/android_phone.jpg" alt="" loading="lazy"><figcaption><b>4 · SIM + network</b>Dual SIM is normal in India. Wi-Fi calling off before the code, not after it fails.</figcaption></figure>
+      <figure><img src="assets/screens/android_perms.jpg" alt="" loading="lazy"><figcaption><b>5 · Permissions</b>Reason before every system dialog. "Never reads your SMS or OTPs".</figcaption></figure>
+      <figure><img src="assets/screens/ios_settings.jpg" alt="" loading="lazy"><figcaption><b>iPhone only · Voicemail</b>Live Voicemail and Screen Unknown Callers silently block forwarding. We show exactly which rows.</figcaption></figure>
+      <figure><img src="assets/screens/android_forward.jpg" alt="" loading="lazy"><figcaption><b>6 · Forwarding code</b>**004*, works on Jio, Airtel, Vi, BSNL. Undo code shown before they dial.</figcaption></figure>
+      <figure><img src="assets/screens/android_carrier.jpg" alt="" loading="lazy"><figcaption><b>Network confirms</b>"Activated" from the carrier, then straight back to Sonic.</figcaption></figure>
+      <figure><img src="assets/screens/android_incoming.jpg" alt="" loading="lazy"><figcaption><b>7 · Test call</b>Sonic calls, you decline, Sonic picks up. Proof before "done".</figcaption></figure>
+      <figure><img src="assets/screens/android_live.jpg" alt="" loading="lazy"><figcaption><b>8 · Live</b>What a day with Sonic looks like, then delivery instructions as the next step.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Decisions I made, and why</h2>
+    <p class="sub">The ones a reviewer is most likely to question.</p>
+    <div class="cols decisions">
+      <div class="card"><h3>Unknown numbers only, by default</h3><p>The scariest thing about a call assistant is "will Amma's call go to a bot?". Defaulting to unknown numbers means family works exactly like today, and the user opts into more once they trust it.</p></div>
+      <div class="card"><h3>Conditional forwarding (**004*), not USSD</h3><p>DoT stopped USSD-based forwarding (the *401* style) in April 2024. **004* forwards only when busy, unanswered or unreachable, so the phone always rings first. It's the same code Truecaller uses across all four networks.</p></div>
+      <div class="card"><h3>iPhone gets its own voicemail step</h3><p>On recent iOS, Live Voicemail and Screen Unknown Callers answer missed calls before forwarding kicks in, so Sonic would never get them. It fails silently, which is the worst kind of failure, so it gets a full step.</p></div>
+      <div class="card"><h3>No "done" without a test call</h3><p>Forwarding codes fail for boring reasons: wrong SIM, Wi-Fi calling, network. The test call (Sonic calls, you decline) catches all of them while the user is still in setup and still motivated.</p></div>
+      <div class="card"><h3>The app computes, the model talks</h3><p>"Is it after 10 pm?" and "does this match an order?" are lookups. In testing, the model got the 10 pm rule wrong; once the app passed it in as a fact, it stopped failing.</p></div>
+      <div class="card"><h3>Riders get through, strangers get nothing</h3><p>My first rule (name the restaurant or no address) turned away real riders who just didn't remember it. Now it's: the app must match an active order, plus any one detail they already have. Confirming what they know leaks nothing.</p></div>
+      <div class="card"><h3>Honest about being AI</h3><p>Sonic opens as "Ananya's assistant", says yes if asked "are you a bot", and never claims it can connect the call. Callers forgive a bot; they don't forgive being fooled.</p></div>
+      <div class="card"><h3>Hinglish, not just English</h3><p>Riders, guards and parents switch languages mid-sentence. The agent mirrors the caller turn by turn, and the onboarding has a Hinglish toggle. Supernova's own app explains in Hinglish, so this felt native.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Assumptions</h2>
+    <div class="cols">
+      <ul class="plain">
+        <li><b>The user:</b> Ananya Reddy, PM in Bengaluru, lives with her mother. Home in HSR Layout, office in Bellandur. Invented for this assignment.</li>
+        <li><b>Sonic number:</b> each user gets a Bengaluru number (+91 80 ...). Calls forwarded to it reach their own agent.</li>
+        <li><b>Active orders:</b> in the prototype they're passed in as call context. In the real app: read Swiggy / Zomato / Zepto order notifications on Android (opt-in, asked at the delivery-instructions step, not in core setup), and a one-tap "expecting a delivery" on iPhone.</li>
+      </ul>
+      <ul class="plain">
+        <li><b>Caller ID:</b> saved contacts come from the Contacts permission; spam reports from a shared spam list.</li>
+        <li><b>Notifications:</b> urgent calls ring through as a loud alert; everything else is a quiet summary.</li>
+        <li><b>Model:</b> the live chat runs on gpt-oss-120b (Cloudflare Workers AI, free tier). A production voice agent would use a faster, stronger model plus speech-to-text and text-to-speech; the prompt is written for spoken replies either way.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>What I'd measure after launch</h2>
+    <p class="sub">The first one matters most: a missed emergency costs more trust than a hundred handled spam calls.</p>
+    <div class="metrics">
+      <div class="metric top"><b>Missed-urgent rate</b><span>Calls later marked urgent by the user that Sonic logged as a message. Target near zero, reviewed weekly.</span></div>
+      <div class="metric"><b>Setup completion by step</b><span>Especially forwarding-code success by network and SIM slot, and iPhone voicemail step drop-off.</span></div>
+      <div class="metric"><b>Test-call pass rate</b><span>First-try pass vs. needed the help sheet. Tells us which fix to promote into the main flow.</span></div>
+      <div class="metric"><b>Delivery success</b><span>Rider calls that ended in DELIVERY_DONE, and average turns to get there.</span></div>
+      <div class="metric"><b>Undo within 7 days</b><span>Users dialling ##004# or pausing. The honest retention signal for trust.</span></div>
+      <div class="metric"><b>Spam call length</b><span>Seconds until a spam call ends. Shorter is better for everyone.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    Built by Murali Krishna Dogiparthi for Supernova's AI APM assignment.
+    Prototype screens, prompt and test harness are in this <a href="https://github.com/muralikrishnadogiparthi13/sonic-assignment">GitHub repo</a>.
+  </footer>
+</div>
+</body>
+</html>

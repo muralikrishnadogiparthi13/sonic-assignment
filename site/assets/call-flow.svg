@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="Onest, system-ui, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#6b6680"/></marker>
+    <style>
+      .b{fill:#fff;stroke:#d9d3ea;stroke-width:1.5}
+      .t{font-size:13px;fill:#16161A;font-weight:600}
+      .s{font-size:11.5px;fill:#5b5670}
+      .h{font-size:11px;font-weight:800;letter-spacing:.06em;fill:#8551FF}
+      .l{stroke:#6b6680;stroke-width:1.6;fill:none;marker-end:url(#a)}
+      .tag{font-size:11px;font-weight:800;fill:#fff}
+    </style>
+  </defs>
+  <rect width="1000" height="640" fill="#F4F1FF"/>
+
+  <!-- top spine -->
+  <rect x="380" y="18" width="240" height="44" rx="22" fill="#16161A"/>
+  <text x="500" y="45" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Call forwarded to Sonic</text>
+  <path class="l" d="M500 62 V84"/>
+  <rect class="b" x="300" y="86" width="400" height="56" rx="16"/>
+  <text x="500" y="108" text-anchor="middle" class="t">App adds what it knows (not the model)</text>
+  <text x="500" y="128" text-anchor="middle" class="s">saved contact? · spam reports · active orders · daytime or night rule</text>
+  <path class="l" d="M500 142 V164"/>
+  <rect x="330" y="166" width="340" height="44" rx="22" fill="#8551FF"/>
+  <text x="500" y="193" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">"This is Sonic, Ananya's assistant..."</text>
+  <path class="l" d="M500 210 V230"/>
+  <rect x="420" y="232" width="160" height="36" rx="10" fill="#F6B726"/>
+  <text x="500" y="255" text-anchor="middle" font-size="13" font-weight="800" fill="#3B2E0C">Who is it, and why?</text>
+
+  <!-- branches -->
+  <path class="l" d="M500 268 V286 H100 V306"/>
+  <path class="l" d="M500 286 H300 V306"/>
+  <path class="l" d="M500 286 V306"/>
+  <path class="l" d="M500 286 H700 V306"/>
+  <path class="l" d="M500 286 H900 V306"/>
+
+  <!-- column 1 delivery -->
+  <text x="100" y="324" text-anchor="middle" class="h">DELIVERY</text>
+  <rect class="b" x="18" y="332" width="164" height="76" rx="14"/>
+  <text x="100" y="354" text-anchor="middle" class="t">Matches an active</text>
+  <text x="100" y="371" text-anchor="middle" class="t">order?</text>
+  <text x="100" y="391" text-anchor="middle" class="s">app + 1 detail they know</text>
+  <path class="l" d="M60 408 V430"/><text x="50" y="424" text-anchor="end" class="s">yes</text>
+  <path class="l" d="M140 408 V530"/><text x="150" y="424" class="s">no</text>
+  <rect class="b" x="18" y="432" width="104" height="86" rx="14"/>
+  <text x="70" y="454" text-anchor="middle" class="t">Step by step</text>
+  <text x="70" y="472" text-anchor="middle" class="s">landmark → gate</text>
+  <text x="70" y="488" text-anchor="middle" class="s">→ flat / reception</text>
+  <text x="70" y="506" text-anchor="middle" class="s">+ handover rule</text>
+  <path class="l" d="M70 518 V552"/>
+
+  <!-- column 2 spam -->
+  <text x="300" y="324" text-anchor="middle" class="h">SALES / SPAM</text>
+  <rect class="b" x="218" y="332" width="164" height="76" rx="14"/>
+  <text x="300" y="354" text-anchor="middle" class="t">"Not interested,</text>
+  <text x="300" y="371" text-anchor="middle" class="t">please don't call"</text>
+  <text x="300" y="391" text-anchor="middle" class="s">confirms nothing, no callback</text>
+  <path class="l" d="M300 408 V552"/>
+
+  <!-- column 3 scam -->
+  <text x="500" y="324" text-anchor="middle" class="h">SCAM</text>
+  <rect class="b" x="418" y="332" width="164" height="76" rx="14"/>
+  <text x="500" y="354" text-anchor="middle" class="t">OTP, KYC, customs,</text>
+  <text x="500" y="371" text-anchor="middle" class="t">"digital arrest"</text>
+  <text x="500" y="391" text-anchor="middle" class="s">refuse in one line, hang up</text>
+  <path class="l" d="M500 408 V552"/>
+
+  <!-- column 4 known -->
+  <text x="700" y="324" text-anchor="middle" class="h">FAMILY / FRIENDS</text>
+  <rect class="b" x="618" y="332" width="164" height="76" rx="14"/>
+  <text x="700" y="354" text-anchor="middle" class="t">Listen, then:</text>
+  <text x="700" y="371" text-anchor="middle" class="t">is it urgent?</text>
+  <text x="700" y="391" text-anchor="middle" class="s">health, police, stranded, outage</text>
+  <path class="l" d="M660 408 V552"/><text x="650" y="424" text-anchor="end" class="s">yes</text>
+  <path class="l" d="M740 408 V552"/><text x="750" y="424" class="s">no</text>
+  <rect x="618" y="440" width="84" height="40" rx="10" fill="#FFE3E3"/>
+  <text x="660" y="457" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a1161b">alert now</text>
+  <text x="660" y="472" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a1161b">+ "call 112"</text>
+
+  <!-- column 5 unknown -->
+  <text x="900" y="324" text-anchor="middle" class="h">UNKNOWN / OTHER</text>
+  <rect class="b" x="818" y="332" width="164" height="150" rx="14"/>
+  <text x="832" y="354" class="s"><tspan font-weight="700" fill="#16161A">"It's Rohan, new no."</tspan></text>
+  <text x="832" y="370" class="s">warm, but unverified</text>
+  <text x="832" y="392" class="s"><tspan font-weight="700" fill="#16161A">Clinic, school, HR</tspan></text>
+  <text x="832" y="408" class="s">take message, share nothing</text>
+  <text x="832" y="430" class="s"><tspan font-weight="700" fill="#16161A">Wrong number</tspan></text>
+  <text x="832" y="452" class="s"><tspan font-weight="700" fill="#16161A">Won't say who</tspan> → end</text>
+  <text x="832" y="468" class="s">after asking twice</text>
+  <path class="l" d="M900 482 V552"/>
+
+  <!-- tags row -->
+  <g class="tag">
+    <rect x="20" y="554" width="100" height="24" rx="12" fill="#22C35E"/><text x="70" y="570" text-anchor="middle" class="tag">DELIVERY_DONE</text>
+    <rect x="96" y="532" width="90" height="22" rx="11" fill="#5b5670"/><text x="141" y="547" text-anchor="middle" class="tag">SUSPICIOUS</text>
+    <rect x="255" y="554" width="90" height="24" rx="12" fill="#5b5670"/><text x="300" y="570" text-anchor="middle" class="tag">SPAM</text>
+    <rect x="455" y="554" width="90" height="24" rx="12" fill="#FF5A5F"/><text x="500" y="570" text-anchor="middle" class="tag">SCAM</text>
+    <rect x="618" y="554" width="84" height="24" rx="12" fill="#FF5A5F"/><text x="660" y="570" text-anchor="middle" class="tag">URGENT</text>
+    <rect x="706" y="554" width="84" height="24" rx="12" fill="#8551FF"/><text x="748" y="570" text-anchor="middle" class="tag">MESSAGE</text>
+    <rect x="840" y="554" width="120" height="24" rx="12" fill="#8551FF"/><text x="900" y="570" text-anchor="middle" class="tag">MESSAGE / URGENT</text>
+  </g>
+  <path d="M40 594 H960" stroke="#d9d3ea" stroke-width="1.5"/>
+  <text x="500" y="620" text-anchor="middle" font-size="13.5" font-weight="700" fill="#16161A">Ananya gets one notification per call. Urgent ones ring through; spam is a silent log.</text>
+</svg>
