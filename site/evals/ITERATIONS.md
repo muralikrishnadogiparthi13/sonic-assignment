@@ -9,8 +9,13 @@ Claude Sonnet plays the caller from a brief; a separate Claude Sonnet judge grad
 | 2 | 20/24 | App now computes the 10 pm handover rule (the model got time comparisons wrong). Verify-before-address step. Tag table. Example calls. Output guard strips markdown and caps length (one scam call got a markdown essay). |
 | 3 | 20/24 | Simulated riders often "didn't know the restaurant", and Sonic turned real riders away. Switched to a verification ladder: app + any one matching detail (restaurant, item, building or area). OTP requests need no verification because nothing is shared. Stronger Hinglish mirroring. |
 | 4 | 21/24 | Model copied a line from an example into its own reply: examples are now marked as separate calls. Manager outage was marked MESSAGE: work-in-the-next-hour is now explicitly URGENT. |
+| 5 | 18/24 | Moved to the production account. No big prompt change (wrong-item rule, greetings), yet 3 fewer passes: the same prompt varies run to run, so one run is never the verdict. |
+| 6 | 22/24 | Two steps per delivery turn, "I can't connect calls", always confirm the callback number, "from the bank" is sales until they ask for codes. |
+
+Remaining misses in run 6: one office delivery left out "Block C" in the drop instruction, and one unknown "brother" call didn't repeat the callback number.
 
 Things I learned that changed the product, not just the prompt:
 - Strict verification protects the address but sends the food back. The real trade-off is "rider gets through in 2 turns" vs "stranger gets nothing". The ladder keeps both.
 - Anything that is a lookup or a comparison (time of day, which order matches) belongs to the app, not the model.
+- Results move by 3 to 4 calls between runs of the same prompt. Read trends across runs, and look at transcripts, not one score.
 - The free tier allows roughly 400 replies a day, so test runs and reviewer traffic must not share one account on the same day.

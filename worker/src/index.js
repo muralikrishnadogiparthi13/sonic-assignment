@@ -6,9 +6,6 @@ import { SYSTEM_PROMPT } from './prompt.js';
 
 const MODELS = {
   'gpt-oss-120b': '@cf/openai/gpt-oss-120b',
-  'kimi-k2.6': '@cf/moonshotai/kimi-k2.6',
-  'glm-5.3': '@cf/zai-org/glm-5.3',
-  'nemotron-3-120b': '@cf/nvidia/nemotron-3-120b-a12b',
   'llama-3.3-70b': '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
 };
 const DEFAULT_MODEL = 'gpt-oss-120b';

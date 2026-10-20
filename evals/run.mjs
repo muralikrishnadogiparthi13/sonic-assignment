@@ -11,7 +11,10 @@ const all = JSON.parse(fs.readFileSync(new URL('./scenarios.json', import.meta.u
 const scenarios = only ? all.filter(s => only.split(',').includes(s.id)) : all;
 const MAX_TURNS = 7;
 
-function claude(model, system, prompt) {
+async function claude(model, system, prompt) {
+  for (let i = 0; ; i++) { try { return await claude1(model, system, prompt); } catch (e) { if (i === 2) throw e; await new Promise(r => setTimeout(r, 3000)); } }
+}
+function claude1(model, system, prompt) {
   return new Promise((res, rej) => {
     const p = spawn('claude', ['-p', '--model', model, '--system-prompt', system, '--tools', ''], { cwd: '/private/tmp' });
     let out = '', err = '';

@@ -1,1 +1,1 @@
-window.SONIC_API = 'https://sonic-agent.humorous-grandparent.workers.dev';
+window.SONIC_API = 'https://sonic-agent.muralikd.workers.dev';
