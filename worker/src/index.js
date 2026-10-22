@@ -140,9 +140,18 @@ async function runModel(env, modelKey, system, messages) {
   return extractText(out);
 }
 
+const END_TAGS = ['DELIVERY_DONE', 'NOTIFY', 'MESSAGE', 'URGENT', 'SPAM', 'SCAM', 'SUSPICIOUS', 'WRONG_NUMBER'];
+// The model occasionally garbles a tag (e.g. END:URGURG). Map it to the closest real outcome so the app never gets an unknown one.
+function normTag(t) {
+  if (t === 'NOTIFY' || t === 'URGENT') return t;
+  const k = t.slice(4);
+  if (END_TAGS.includes(k)) return t;
+  const hit = END_TAGS.find(x => x.slice(0, 3) === k.slice(0, 3));
+  return 'END:' + (hit || 'MESSAGE');
+}
 function splitTags(text) {
   const tags = [];
-  let reply = guardSpeech(text.replace(/\[(END:[A-Z_]+|NOTIFY|URGENT)\]/g, (_, t) => { tags.push(t); return ''; }));
+  let reply = guardSpeech(text.replace(/\[(END:[A-Z_]+|NOTIFY|URGENT)\]/g, (_, t) => { tags.push(normTag(t)); return ''; }));
   // A turn that asks a question cannot end the call: keep alerts, drop the hang-up.
   if (/\?\s*$/.test(reply) && tags.some(t => t.startsWith('END:'))) {
     const kept = [];
@@ -192,7 +201,7 @@ export default {
       return json({ error: 'not found' }, 404);
     } catch (e) {
       const msg = String(e && e.message || e);
-      if (/4006|daily free allocation/.test(msg)) return json({ error: 'quota', detail: "Sonic's free daily limit on Cloudflare is used up. It resets at 5:30 am IST." }, 503);
+      if (/4006|daily free allocation/.test(msg)) return json({ error: 'quota', detail: "Sonic is over its free daily limit on Cloudflare right now. Please try again later." }, 503);
       return json({ error: 'model_error', detail: msg.slice(0, 300) }, 502);
     }
   },

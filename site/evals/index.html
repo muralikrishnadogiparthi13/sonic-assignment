@@ -87,7 +87,7 @@ summary::-webkit-details-marker{display:none}
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 fetch('data.json').then(r => r.json()).then(({ history, latest }) => {
   const max = Math.max(...history.map(h => h.total));
-  document.getElementById('hist').innerHTML = history.map(h => `<div class="bar"><b>${h.passed}/${h.total}</b><i style="height:${Math.round(h.passed / max * 120)}px"></i><span>Run ${h.run}</span></div>`).join('');
+  document.getElementById('hist').innerHTML = history.map(h => `<div class="bar"><b>${h.passed}/${h.total}</b><i style="height:${Math.round(h.passed / h.total * 120)}px"></i><span>Run ${h.run}</span></div>`).join('');
   const groups = ['All', 'Failed', ...new Set(latest.map(r => r.group))];
   let cur = 'All';
   const f = document.getElementById('filters');
