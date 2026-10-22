@@ -22,6 +22,8 @@ Also added: D9 (nobody home to collect, daytime), D10 (courier with no matching 
 
 Second audit pass (22 Oct) confirmed both P0s and all P1s fixed. Two small follow-ups were moved into code, checked offline and with live calls: a rider who names the restaurant or building before the app is now asked "which app?" instead of the restaurant again, and an urgent alert for an unknown number always comes with a spoken callback promise.
 
+Final fix (22 Oct): reply language is now decided by the app from the caller's last message (English unless they used Hindi words), because the model kept guessing "rider = Hinglish". A closing line also stops Sonic from describing other people or calls ("did Amma call?"). Checked with three live calls.
+
 Remaining misses in run 6: one office delivery left out "Block C" in the drop instruction, and one unknown "brother" call didn't repeat the callback number.
 
 Things I learned that changed the product, not just the prompt:

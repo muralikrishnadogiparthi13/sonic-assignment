@@ -30,14 +30,18 @@ function homeHandover(now) {
     ? 'DAYTIME: take it up to Flat 1203 and hand it to Lakshmi aunty (Ananya\'s mother).'
     : 'NIGHT (after 10 pm): leave it with the security guard at Gate 2. Do not go up to the flat.';
 }
-function fillContext(ctx = {}) {
+// Language is decided by the app from the caller's last message, not guessed by the model from who is calling.
+const HINDI_WORDS = /\b(bhaiya|bhai|madam|ji|hai|hain|hoon|ho|kahan|kya|kaun|kaunse|batao|bolo|bata|theek|thik|nahi|nahin|aap|mera|meri|mujhe|yaad|pata|aaya|gaya|raha|rahi|karo|kar|dena|lena|abhi|jaldi|order hai|se hoon)\b/i;
+function replyLanguage(text) { return HINDI_WORDS.test(text || '') ? 'Hinglish (Roman script)' : 'English'; }
+function fillContext(ctx = {}, lastCallerText = '') {
   const v = (k, d) => (ctx[k] && String(ctx[k]).slice(0, 400)) || d;
   return SYSTEM_PROMPT
     .replace('{{now}}', v('now', 'unknown'))
     .replace('{{caller_number}}', v('caller_number', 'withheld'))
     .replace('{{caller_match}}', v('caller_match', 'unknown number'))
     .replace('{{active_orders}}', v('active_orders', 'none'))
-    .replace('{{home_handover_now}}', homeHandover(ctx.now));
+    .replace('{{home_handover_now}}', homeHandover(ctx.now))
+    .replaceAll('{{reply_language}}', replyLanguage(lastCallerText));
 }
 
 // Output guard: a phone call can't speak markdown. Strip it and keep the reply short.
@@ -183,7 +187,8 @@ export default {
         const msgs = messages.length && messages[0].role === 'assistant'
           ? [{ role: 'user', content: '[The call has just connected. Say your first line.]' }, ...messages]
           : messages;
-        const system = fillContext(body.ctx);
+        const lastCaller = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+        const system = fillContext(body.ctx, lastCaller);
         let clean = sanitize(await runModel(env, modelKey, system, msgs));
         let retried = false;
         if (clean.bad) { retried = true; clean = sanitize(await runModel(env, modelKey, system, msgs)); }
