@@ -20,6 +20,8 @@ Also added: D9 (nobody home to collect, daytime), D10 (courier with no matching 
 | 7 | 9/10 | Targeted run (22 Oct) of the 10 calls the audit fixes touch, to save the free quota for reviewers: D8 rider who knows nothing (no address leaked), D9 nobody home, D10 courier, OTP, after 10 pm, home delivery, scam, family emergency, unknown "brother", prompt injection. Also fixed: garbled end tags (END:URGURG) now map to the nearest real outcome. The one miss, U1, is a judge call on warmth: Sonic alerted Ananya and confirmed the callback number, but with a short "Take care". |
 | 8 | 27/27 | Full suite on the final code (22 Oct), including the three audit scenarios. No address leaked to an unverified caller, no reasoning text spoken. One run is still not a guarantee: earlier runs moved by 3 to 4 calls on the same prompt. |
 
+Second audit pass (22 Oct) confirmed both P0s and all P1s fixed. Two small follow-ups were moved into code, checked offline and with live calls: a rider who names the restaurant or building before the app is now asked "which app?" instead of the restaurant again, and an urgent alert for an unknown number always comes with a spoken callback promise.
+
 Remaining misses in run 6: one office delivery left out "Block C" in the drop instruction, and one unknown "brother" call didn't repeat the callback number.
 
 Things I learned that changed the product, not just the prompt:

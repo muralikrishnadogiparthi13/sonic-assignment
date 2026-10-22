@@ -117,6 +117,12 @@ function privacyGuard(ctx, messages, reply, tags) {
   const lastCaller = [...messages].reverse().find(m => m.role === 'user')?.content || '';
   const hi = HINDI.test(lastCaller);
   const hasOrder = String(ctx?.active_orders || 'none').toLowerCase() !== 'none';
+  const callerSaid = messages.filter(m => m.role === 'user').map(m => m.content.toLowerCase()).join(' ');
+  const appSaid = APPS.some(a => callerSaid.includes(a));
+  const orders = String(ctx?.active_orders || '').toLowerCase();
+  const details = orders.split(/[^a-z]+/).filter(w => w.length >= 4 && !STOP.has(w)).concat(orders.includes('home') ? ['palm meadows', 'hsr'] : [], orders.includes('office') ? ['tranquil', 'bellandur'] : []);
+  // They already gave a matching detail but no app: ask for the app, not the restaurant again.
+  if (!appSaid && details.some(d => callerSaid.includes(d)) && !/\bapp\b/.test(said)) return { reply: hi ? 'Theek hai bhaiya, kaunse app se order hai?' : 'Sure, which app is the order from?', tags: [] };
   if (!/restaurant/.test(said)) return { reply: hi ? 'Haan bhaiya, kaunse restaurant se hai?' : 'Sure, which restaurant is it from?', tags: [] };
   if (!/building|area/.test(said)) return { reply: hi ? 'Koi baat nahi, app mein kaunsi building ya area dikh raha hai?' : 'No problem, which building or area does your app show?', tags: [] };
   return { reply: hi ? 'Sorry bhaiya, order match kiye bina address share nahi kar sakte. Main Ananya ko bata deti hoon.' : "Sorry, I can't share the address without matching the order. I'll let Ananya know you called.", tags: hasOrder ? ['NOTIFY', 'END:SUSPICIOUS'] : ['END:SUSPICIOUS'] };
@@ -185,6 +191,11 @@ export default {
         let { reply, tags } = splitTags(clean.text);
         const g = privacyGuard(body.ctx, messages, reply, tags);
         if (g) ({ reply, tags } = g);
+        // Unknown caller + urgent alert: the callback promise must be said out loud, so Ananya can actually reach them.
+        if (!isSaved(body.ctx) && tags.some(t => t === 'URGENT' || t === 'END:URGENT') && !/this number|is number|isi number|call you back|call back kar/i.test(reply)) {
+          const lastCaller = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+          reply = (reply + (HINDI.test(lastCaller) ? ' Main unhe isi number pe call back karne ko bol rahi hoon.' : " I'll ask her to call you back on this number.")).trim();
+        }
         return json({ reply: reply || "Sorry, the line isn't clear. Could you say that again?", tags, model: modelKey, guarded: !!g, retried });
       }
       if (url.pathname === '/summary') {
