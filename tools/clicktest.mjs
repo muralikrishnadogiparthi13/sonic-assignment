@@ -23,9 +23,7 @@ try {
     for (const p of perms.slice(1, -1)) { await b.click(`[data-perm=${p}]`); await b.click('.sysdlg [data-r=yes]'); }
     console.log('  continue enabled without optional notif:', !(await b.eval('document.querySelector(".footer .cta").disabled')));
     await b.shot(`${out}/ct_${os}_perms.png`);
-    await b.click('[data-act=next]'); await log('-> phone');
-    console.log('  cta disabled before wifi:', await b.eval('document.querySelector(".cta").disabled'));
-    await b.click('[data-act=wifi]'); await b.shot(`${out}/ct_${os}_phone.png`); await b.click('[data-act=next]'); await log('-> next after phone');
+    await b.click('[data-act=next]'); await log('-> next after perms');
     if (os === 'ios') {
       await b.click('[data-act=open-settings]'); await b.shot(`${out}/ct_ios_settings.png`);
       await b.click('[data-act=close-outside]');
@@ -64,7 +62,7 @@ try {
   await f.goto(base + '?os=android');
   await f.eval(`(()=>{const go=s=>document.querySelector(s).click(); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]');})()`); await f.sleep(300);
   for (const p of ['contacts', 'phone']) { await f.click(`[data-perm=${p}]`); await f.click('.sysdlg [data-r=yes]'); }
-  await f.click('[data-act=next]'); await f.click('[data-sim="2"]'); await f.click('[data-act=wifi]'); await f.click('[data-act=next]');
+  await f.click('[data-act=next]'); await f.click('[data-act=sim-toggle]');
   await f.click('[data-act=open-dialer]'); await f.click('#dial'); await f.sleep(1600);
   console.log('failure dialog:', await f.eval('document.querySelector(".carrier")?.innerText.replace(/\\s+/g," ")'));
   await f.click('[data-act=fwd-fail]');

@@ -260,3 +260,59 @@ h2{font-size:22px;line-height:1.2;margin:0 0 8px;font-weight:800}
 
 .outside.and .breadcrumb{top:auto;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.16);padding:7px 14px}
 .tab svg,.flowmini svg{flex:none}
+
+/* v2: forwarding animation (someone calls → your phone rings → you miss it → Sonic answers), 6s loop */
+.fanim{display:flex;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px 10px 12px;margin:4px 0 0}
+.fa-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:11.5px;line-height:1.25;color:#D7D7E0;font-weight:600;opacity:.35;min-width:0}
+.fa-ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--surface2);color:#fff}
+.fa-ic.ring{background:#173524;color:#7EE2A4}
+.fa-ic.miss{background:#3D2320;color:var(--coral)}
+.fa-ic.son{background:var(--purple)}
+.fa-line{flex:0 0 14px;height:2px;margin-top:20px;background:#2f2f37;position:relative;overflow:hidden}
+.fa-line::after{content:"";position:absolute;inset:0;background:var(--amber);transform:translateX(-100%)}
+.n1{animation:fa1 6s infinite}.n2{animation:fa2 6s infinite}.n3{animation:fa3 6s infinite}.n4{animation:fa4 6s infinite}
+.l1::after{animation:fl1 6s infinite}.l2::after{animation:fl2 6s infinite}.l3::after{animation:fl3 6s infinite}
+.n2 .fa-ic{animation:shake 6s infinite}
+.n4 .fa-ic{animation:glow 6s infinite}
+@keyframes fa1{0%,2%{opacity:.35}6%,92%{opacity:1}100%{opacity:.35}}
+@keyframes fl1{0%,10%{transform:translateX(-100%)}18%,92%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+@keyframes fa2{0%,18%{opacity:.35}22%,92%{opacity:1}100%{opacity:.35}}
+@keyframes shake{0%,22%{transform:none}24%{transform:rotate(-12deg)}26%{transform:rotate(12deg)}28%{transform:rotate(-12deg)}30%{transform:rotate(12deg)}32%{transform:rotate(-8deg)}34%{transform:rotate(8deg)}36%,100%{transform:none}}
+@keyframes fl2{0%,40%{transform:translateX(-100%)}46%,92%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+@keyframes fa3{0%,46%{opacity:.35}50%,92%{opacity:1}100%{opacity:.35}}
+@keyframes fl3{0%,56%{transform:translateX(-100%)}62%,92%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+@keyframes fa4{0%,62%{opacity:.35}66%,92%{opacity:1}100%{opacity:.35}}
+@keyframes glow{0%,64%{box-shadow:none}70%{box-shadow:0 0 0 8px rgba(133,81,255,.3)}80%,100%{box-shadow:none}}
+@media (prefers-reduced-motion:reduce){.fa-node,.fa-node .fa-ic,.fa-line::after{animation:none!important;opacity:1;transform:none}}
+
+.simrow{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px 6px 6px 12px;margin:0 0 14px;font-size:13px;color:#C9C9D3}
+.simrow span{flex:1;min-width:0}
+.simrow b{color:#fff}
+.simrow .link{font-size:13px;color:#C9B6FF;padding:6px 8px}
+.code .num{color:#C9B6FF;font-weight:700}
+.code{white-space:nowrap}
+.code span{overflow-wrap:normal;overflow:hidden;text-overflow:ellipsis}
+.assure{display:flex;flex-direction:column;gap:8px;background:var(--cream);color:var(--cream-ink);border-radius:18px;padding:12px 14px;font-size:13.5px;line-height:1.35;font-weight:600;margin-bottom:6px}
+.assure div{display:flex;gap:8px;align-items:flex-start}
+.assure svg{flex:none;margin-top:1px}
+
+.dial-num{font-size:22px;white-space:nowrap;word-break:normal;max-width:100%;overflow:hidden;text-overflow:clip;direction:ltr}
+.dialrow{display:grid;grid-template-columns:78px 78px 78px;gap:26px;justify-items:center;align-items:center;margin-top:18px}
+.dialrow .callbtn{margin-top:0}
+.bksp{width:60px;height:60px;border:0;background:transparent;color:#ddd;font-size:26px}
+@media (max-width:380px){.keys,.dialrow{grid-template-columns:repeat(3,70px);gap:14px 20px}.key{width:70px;height:70px}.callbtn{width:70px;height:70px}}
+@media (max-width:430px){
+  .topbar{padding:8px 10px;flex-wrap:nowrap;gap:6px}
+  .brand{font-size:0;gap:0}.brand img{width:24px;height:24px}
+  .controls{gap:6px;flex-wrap:nowrap}
+  .seg{padding:2px}.seg button{padding:6px 9px;font-size:12px}
+  .ghost{padding:6px 10px;font-size:12px}
+  #toggleNotes{display:none}
+  .stage{padding:0 0 30px;gap:16px}
+  .phone{height:calc(100dvh - 48px)}
+  .hint{display:none}
+}
+@media (max-width:380px){
+  #restart{font-size:0;padding:5px 10px}#restart::after{content:"↻";font-size:15px}
+  .seg button{padding:6px 8px}
+}

@@ -120,18 +120,17 @@ footer{padding:30px 0 50px;color:var(--muted);font-size:14px;border-top:1px soli
 
   <section>
     <h2>The onboarding, screen by screen</h2>
-    <p class="sub">Four real setup steps on Android, five on iPhone. Each worry gets answered on the screen where it comes up, not in an FAQ.</p>
+    <p class="sub">Three setup steps on Android, four on iPhone. One idea per screen, and each worry answered on the screen where it comes up.</p>
     <div class="strip">
-      <figure><img src="assets/screens/android_welcome.jpg" alt="" loading="lazy"><figcaption><b>1 · Welcome</b>Outcome first, 40 sec explainer with voiceover, "never pretends to be you" under the button.</figcaption></figure>
-      <figure><img src="assets/screens/android_what.jpg" alt="" loading="lazy"><figcaption><b>2 · What it handles</b>One mini call per call type. Worries as tap-to-open chips.</figcaption></figure>
-      <figure><img src="assets/screens/android_choose.jpg" alt="" loading="lazy"><figcaption><b>3 · Which calls</b>Unknown-only by default. "Your phone still rings first" on both options.</figcaption></figure>
-      <figure><img src="assets/screens/android_phone.jpg" alt="" loading="lazy"><figcaption><b>4 · SIM + network</b>Dual SIM is normal in India. Wi-Fi calling off before the code, not after it fails.</figcaption></figure>
-      <figure><img src="assets/screens/android_perms.jpg" alt="" loading="lazy"><figcaption><b>5 · Permissions</b>Reason before every system dialog. "Never reads your SMS or OTPs".</figcaption></figure>
+      <figure><img src="assets/screens/android_welcome.jpg" alt="" loading="lazy"><figcaption><b>1 · Welcome</b>The moment Sonic is for: a missed call, already handled. 40 sec explainer with voiceover.</figcaption></figure>
+      <figure><img src="assets/screens/android_what.jpg" alt="" loading="lazy"><figcaption><b>2 · What it does</b>One mini call per call type. Five worries as tap-to-open chips, including cost and "what if it's down".</figcaption></figure>
+      <figure><img src="assets/screens/android_choose.jpg" alt="" loading="lazy"><figcaption><b>3 · Which calls</b>"All calls I miss" recommended, so family calls work. "Your phone always rings first" up top.</figcaption></figure>
+      <figure><img src="assets/screens/android_perms.jpg" alt="" loading="lazy"><figcaption><b>4 · Permissions</b>One line of why for each. "Never reads your SMS or OTPs".</figcaption></figure>
       <figure><img src="assets/screens/ios_settings.jpg" alt="" loading="lazy"><figcaption><b>iPhone only · Voicemail</b>Live Voicemail and Screen Unknown Callers silently block forwarding. We show exactly which rows.</figcaption></figure>
-      <figure><img src="assets/screens/android_forward.jpg" alt="" loading="lazy"><figcaption><b>6 · Forwarding code</b>**004*, works on Jio, Airtel, Vi, BSNL. Undo code shown before they dial.</figcaption></figure>
+      <figure><img src="assets/screens/android_forward.jpg" alt="" loading="lazy"><figcaption><b>5 · Forwarding</b>An animation shows the idea first. The code has the Sonic number inside it. Undo shown before they dial.</figcaption></figure>
       <figure><img src="assets/screens/android_carrier.jpg" alt="" loading="lazy"><figcaption><b>Network confirms</b>"Activated" from the carrier, then straight back to Sonic.</figcaption></figure>
-      <figure><img src="assets/screens/android_incoming.jpg" alt="" loading="lazy"><figcaption><b>7 · Test call</b>Sonic calls, you decline, Sonic picks up. Proof before "done".</figcaption></figure>
-      <figure><img src="assets/screens/android_live.jpg" alt="" loading="lazy"><figcaption><b>8 · Live</b>What a day with Sonic looks like, then delivery instructions as the next step.</figcaption></figure>
+      <figure><img src="assets/screens/android_incoming.jpg" alt="" loading="lazy"><figcaption><b>6 · Test call</b>Sonic calls, you decline, Sonic picks up. Proof before "done".</figcaption></figure>
+      <figure><img src="assets/screens/android_live.jpg" alt="" loading="lazy"><figcaption><b>7 · Live</b>What a day with Sonic looks like, then delivery instructions as the next step.</figcaption></figure>
     </div>
   </section>
 
@@ -139,10 +138,10 @@ footer{padding:30px 0 50px;color:var(--muted);font-size:14px;border-top:1px soli
     <h2>Decisions I made, and why</h2>
     <p class="sub">The ones a reviewer is most likely to question.</p>
     <div class="cols decisions">
-      <div class="card"><h3>Unknown numbers only, by default</h3><p>The scariest thing about a call assistant is "will Amma's call go to a bot?". How it works: the forwarding code sends every call you don't pick up to Sonic's number. Sonic checks the caller ID against your contacts, and for a saved contact it doesn't answer. Amma keeps hearing it ring, and you get a missed-call note. That needs a copy of your contacts on Sonic's side, and the permission screen says so.</p></div>
+      <div class="card"><h3>"All calls I miss" by default</h3><p>Family calls are one of Sonic's three jobs, so a default that skips saved contacts would switch off a third of the product for most users. The fear behind it ("will Amma talk to a bot?") is answered instead: your phone always rings first, Sonic says it's your assistant, and "only unknown numbers" is one tap away for people who want it.</p></div>
       <div class="card"><h3>A forwarding code, not "dial the Sonic number"</h3><p>A deliberate change from the brief: dialling Sonic's number on its own would just call Sonic. The user dials **004*&lt;Sonic number&gt;#, which forwards only busy, unanswered or unreachable calls, so the phone always rings first. DoT stopped USSD-style forwarding (*401*) in April 2024. **004* is the standard GSM code Truecaller's India setup uses; behaviour can vary by network, which is why setup ends with a test call. Either way, Sonic replaces network voicemail.</p></div>
       <div class="card"><h3>iPhone gets its own voicemail step</h3><p>Another deliberate change: the step targets Live Voicemail and Screen Unknown Callers, which answer missed calls on the iPhone before forwarding kicks in. Carrier voicemail needs no step, because forwarding replaces it. The app can't read these settings, so the user confirms ("I've turned both off") and the test call is the real check.</p></div>
-      <div class="card"><h3>No "done" without a test call</h3><p>Forwarding codes fail for boring reasons: wrong SIM, Wi-Fi calling, network. The test call (Sonic calls, you decline) catches all of them while the user is still in setup and still motivated.</p></div>
+      <div class="card"><h3>No "done" without a test call</h3><p>Forwarding codes fail for boring reasons: wrong SIM, Wi-Fi calling, network. Those fixes live in the "it failed" help, not in everyone's path. The test call (Sonic calls, you decline) catches all of them while the user is still in setup and still motivated.</p></div>
       <div class="card"><h3>The app computes, the model talks</h3><p>"Is it after 10 pm?" and "does this match an order?" are lookups. In testing, the model got the 10 pm rule wrong; once the app passed it in as a fact, it stopped failing.</p></div>
       <div class="card"><h3>Riders get through, strangers get nothing</h3><p>My first rule (name the restaurant or no address) turned away real riders who just didn't remember it. Now it's: the app must match an active order, plus any one detail they already have. The model is told never to name a detail first, and the app enforces it: if a reply to an unverified caller contains any address word, the app swaps it for the next verification question.</p></div>
       <div class="card"><h3>Honest about being AI</h3><p>Sonic opens as "Ananya's assistant", says yes if asked "are you a bot", and never claims it can connect the call. Callers forgive a bot; they don't forgive being fooled.</p></div>

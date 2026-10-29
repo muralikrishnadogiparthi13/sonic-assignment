@@ -5,7 +5,7 @@ const screen = $('#screen'), sheet = $('#sheet'), backdrop = $('#sheetBackdrop')
 
 const S = {
   os: 'android', lang: 'en', step: 'welcome',
-  choice: 'unknown', sim: 1, network: 'Jio', wifiOff: false,
+  choice: 'all', sim: 1,
   perms: { contacts: false, notif: false, phone: false },
   ios: { lv: true, suc: true, visited: false }, fwdCopied: false, inDialer: false, testTries: 0, tab: 'del', worry: null,
 };
@@ -33,9 +33,9 @@ const ic = (k, sz = 20) => `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}
 const T = k => (COPY[S.lang][k] ?? COPY.en[k] ?? k);
 
 const FLOW = () => S.os === 'ios'
-  ? ['welcome', 'what', 'choose', 'perms', 'phone', 'voicemail', 'forward', 'test', 'live']
-  : ['welcome', 'what', 'choose', 'perms', 'phone', 'forward', 'test', 'live'];
-const LABELS = { welcome: 'Welcome + explainer', what: 'What Sonic handles', choose: 'Choose which calls', phone: 'SIM + network', perms: 'Permissions', voicemail: 'Turn off iPhone voicemail', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
+  ? ['welcome', 'what', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live']
+  : ['welcome', 'what', 'choose', 'perms', 'forward', 'test', 'live'];
+const LABELS = { welcome: 'Welcome + explainer', what: 'What Sonic handles', choose: 'Choose which calls', perms: 'Permissions', voicemail: 'Turn off iPhone voicemail', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
 
 // ---------- helpers ----------
 function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => toastEl.classList.remove('on'), 1600); }
@@ -82,7 +82,7 @@ screens.what = () => {
   const tabs = [['del', T('t_del'), ic('scooter', 16)], ['spam', T('t_spam'), ic('ban', 16)], ['fam', T('t_fam'), ic('home', 16)]];
   const map = { del: ['del_h', 'del_p', 'del_b', 'g'], spam: ['spam_h', 'spam_p', 'spam_b', 'c'], fam: ['fam_h', 'fam_p', 'fam_b', 'a'] }[S.tab];
   const bubbles = T(map[2]).map(([w, t]) => `<div class="bub ${w === 'Sonic' ? 'sonic' : 'caller'}"><span class="who">${w}</span>${t}</div>`).join('');
-  const worries = [1, 2, 3, 4].map(n => `<button class="chip ${S.worry === n ? 'on' : ''}" data-worry="${n}">${T('wq' + n)}</button>`).join('');
+  const worries = [1, 2, 3, 4, 5].map(n => `<button class="chip ${S.worry === n ? 'on' : ''}" data-worry="${n}">${T('wq' + n)}</button>`).join('');
   return `${appbar()}
   <div class="body">
     <p class="kicker">${T('d_kicker')}</p>
@@ -101,52 +101,22 @@ screens.what = () => {
 
 screens.choose = () => {
   const f = T('c_f1');
-  const opt = (k, h, p, badge, flow) => `
+  const opt = (k, h, p, badge) => `
     <button class="opt ${S.choice === k ? 'sel' : ''}" data-choice="${k}">
       ${badge ? `<span class="badge">${T('c_rec')}</span>` : ''}
       <h3>${T(h)}</h3><p>${T(p)}</p><span class="radio"></span>
-      <div class="flowmini">${flow}</div>
     </button>`;
-  const fUnknown = `<span>${ic('phone', 13)} ${S.lang === 'hi' ? 'Anjaan number' : 'Unknown number'}</span><span class="arr">→</span><span>${f[1]}</span><span class="arr">→</span><span class="s">${f[3].split(':')[0]}: Sonic</span></div><div class="flowmini" style="margin-top:6px"><span>${ic('users', 13)} ${S.lang === 'hi' ? 'Contact' : 'Contact'}</span><span class="arr">→</span><span>${S.lang === 'hi' ? 'miss hui' : 'missed'}</span><span class="arr">→</span><span class="you">${S.lang === 'hi' ? 'ring hota rahe + missed-call note' : 'keeps ringing + missed-call note'}</span>`;
-  const fAll = `<span>${ic('phone', 13)} ${f[0]}</span><span class="arr">→</span><span>${f[1]}</span><span class="arr">→</span><span class="you">${f[2]}</span><span class="s">${f[3]}</span>`;
   return `${appbar()}
   <div class="body">
     <p class="kicker">${stepKicker()}</p>
     <h2>${T('c_title')}</h2>
     <p class="lede">${T('c_lede')}</p>
-    ${opt('unknown', 'c1_h', 'c1_p', true, fUnknown)}
-    ${opt('all', 'c2_h', 'c2_p', false, fAll)}
-    ${S.os === 'ios' ? `<div class="tip"><b>${ic('mobile', 18)} iPhone</b>${T('c_ios')}</div>` : ''}
+    <div class="flowmini" style="margin:0 0 16px"><span>${ic('phone', 13)} ${f[0]}</span><span class="arr">→</span><span class="you">${f[1]}</span><span class="arr">→</span><span>${f[2]}</span><span class="arr">→</span><span class="s">${f[3]}</span></div>
+    ${opt('all', 'c2_h', 'c2_p', true)}
+    ${opt('unknown', 'c1_h', 'c1_p', false)}
     <p class="small">${T('c_change')}</p>
   </div>
   <div class="footer"><button class="cta" data-act="next">${T('continue')}</button></div>`;
-};
-
-screens.phone = () => {
-  const nets = ['Jio', 'Airtel', 'Vi', 'BSNL'];
-  return `${appbar()}
-  <div class="body">
-    <p class="kicker">${stepKicker()}</p>
-    <h2>${T('p_title')}</h2>
-    <p class="lede">${T('p_lede')}</p>
-    <div class="card">
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        ${[1, 2].map(n => `<button class="pill-sm ${S.sim === n ? 'on' : ''}" data-sim="${n}">${T('p_sim' + n)} · ${n === 1 ? '98xxx x4120' : '70xxx x8812'}</button>`).join('')}
-      </div>
-      <p class="small" style="margin:0 0 8px">${T('p_net')} ${S.os === 'android' ? `· <span class="done-tick">${T('p_detected')}</span>` : `· ${T('p_pick')}`}</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${nets.map(n => `<button class="pill-sm ${S.network === n ? 'on' : ''}" data-net="${n}">${n}</button>`).join('')}
-      </div>
-    </div>
-    <div class="tip">
-      <b>${ic('wifi', 18)} ${T('p_wifi_h')}</b>${T('p_wifi')}
-      <div style="margin-top:8px;font-weight:700;font-size:13px">${S.os === 'ios' ? T('p_wifi_ios') : T('p_wifi_and')}</div>
-      ${S.wifiOff ? `<div style="margin-top:10px;font-weight:700;color:#146b37">${ic('check', 16)} ${T('p_wifi_ok')}</div>` : `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-        <button class="pill-sm on" data-act="wifi">${T('p_wifi_ok')}</button>
-        <button class="pill-sm" style="background:#fff;color:#3B2E0C;border-color:#e3cf8f" data-act="wifi">${T('p_wifi_none')}</button></div>`}
-    </div>
-  </div>
-  <div class="footer"><button class="cta" data-act="next" ${S.wifiOff ? '' : 'disabled'}>${S.wifiOff ? T('continue') : T('p_wifi_need')}</button></div>`;
 };
 
 screens.perms = () => {
@@ -168,7 +138,7 @@ screens.perms = () => {
     </div>
     <div class="tip"><b>${ic('lock', 18)} ${S.lang === 'hi' ? 'Bharosa' : 'Promise'}</b>${T('r_never')}</div>
   </div>
-  <div class="footer"><button class="cta" data-act="next" ${all ? '' : 'disabled'}>${all ? T('continue') : T('r_need')}</button></div>`;
+  <div class="footer"><button class="cta" data-act="next" ${all ? '' : 'disabled'}>${all ? T('continue') : T(S.os === 'ios' ? 'r_need' : 'r_need_and')}</button></div>`;
 };
 
 screens.voicemail = () => `${appbar()}
@@ -187,26 +157,39 @@ screens.voicemail = () => `${appbar()}
     ${S.ios.visited ? `<button class="cta" data-act="next">${T('v_back')}</button><button class="link" data-act="open-settings">${T('v_again')}</button>` : `<button class="cta" data-act="open-settings">${T('v_open')}</button>`}
   </div>`;
 
+function fwdAnim() {
+  const a = T('f_anim');
+  return `<div class="fanim" aria-hidden="true">
+    <div class="fa-node n1"><div class="fa-ic">${ic('users', 18)}</div><span>${a[0]}</span></div>
+    <div class="fa-line l1"></div>
+    <div class="fa-node n2"><div class="fa-ic ring">${ic('mobile', 18)}</div><span>${a[1]}</span></div>
+    <div class="fa-line l2"></div>
+    <div class="fa-node n3"><div class="fa-ic miss">${ic('phone', 18)}</div><span>${a[2]}</span></div>
+    <div class="fa-line l3"></div>
+    <div class="fa-node n4"><div class="fa-ic son">${sonicMini()}</div><span>${a[3]}</span></div>
+  </div>`;
+}
+function sonicMini() { return `<svg viewBox="0 0 24 24" width="18" height="18"><g fill="#F6B726">${[5, 9, 13, 17].map((x, k) => `<rect x="${x}" y="${12 - [3, 6, 4, 7][k]}" width="2.6" height="${[6, 12, 8, 14][k]}" rx="1.3"/>`).join('')}</g></svg>`; }
+const codeHtml = () => `**004*<b class="num">${SONIC_RAW}</b>#`;
+
 screens.forward = () => {
   const ios = S.os === 'ios';
   return `${appbar()}
   <div class="body">
     <p class="kicker">${stepKicker()}</p>
     <h2>${T('f_title')}</h2>
-    <p class="lede">${T('f_lede')}</p>
-    <div class="numcard">
-      <p class="small" style="margin:0 0 2px;color:#C9B6FF">${T('f_your')}</p>
-      <div class="n">${SONIC_NUMBER}</div>
-      <p class="small" style="margin:4px 0 0">${T('f_your_s')}</p>
-    </div>
+    ${fwdAnim()}
+    <p class="lede" style="margin-top:14px">${T('f_lede')}</p>
+    <div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>SIM ${S.sim} · ${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b></span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>
     <ol class="steps">
-      <li class="${ios && S.fwdCopied ? 'ok' : ''}"><b>${ios ? T('f_1') : T('f_1a')}</b><p>${T('f_1p')}</p>
-        <div class="code"><span>${FWD_CODE}</span><button class="copy" data-act="copy-code">${S.fwdCopied ? T('f_copied') + ' ✓' : T('f_copy')}</button></div>
+      <li class="${ios && S.fwdCopied ? 'ok' : ''}"><b>${ios ? T('f_1') : T('f_1a')}</b>
+        <div class="code"><span>${codeHtml()}</span>${ios ? `<button class="copy" data-act="copy-code">${S.fwdCopied ? T('f_copied') + ' ✓' : T('f_copy')}</button>` : ''}</div>
+        <p class="small" style="margin:0">${ic('bulb', 14)} ${T('f_inside')}</p>
       </li>
       <li><b>${ios ? T('f_2i') : T('f_2a')}</b><p>${ios ? T('f_2ip') : T('f_2ap')}</p></li>
       <li><b>${T('f_3')}</b><p>${T('f_3p')}</p></li>
     </ol>
-    <div class="tip"><b>${ic('undo', 18)} ${S.lang === 'hi' ? 'Kabhi bhi band' : 'Undo anytime'}</b>${T('f_safe')}</div>
+    <div class="assure"><div>${ic('undo', 16)} ${T('f_undo')}</div><div>${ic('shield', 16)} ${T('f_down')}</div></div>
     <button class="link" data-act="fwd-help" style="padding-left:0">${T('f_help')}</button>
   </div>
   <div class="footer"><button class="cta" data-act="open-dialer" ${S.fwdCopied || !ios ? '' : 'disabled'}>${ios ? T('f_open_phone') : T('f_open_dialer')}</button></div>`;
@@ -231,7 +214,7 @@ screens.test_ok = () => `
     <h2>${T('x_ok_h')}</h2>
     <p class="lede">${T('x_ok_p')}</p>
     <div class="bubbles"><div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span>${T('x_line')}</div></div>
-    <p class="small" style="margin-top:14px">${S.lang === 'hi' ? 'Yahi aawaz aapke callers sunenge. Voice baad mein Settings mein badal sakte hain.' : 'This is what your callers will hear. You can change the voice later in Settings.'}</p>
+    
   </div>
   <div class="footer"><button class="cta" data-act="to-live">${T('x_finish')}</button></div>`;
 
@@ -353,15 +336,16 @@ function openDialer() {
       <div class="dial-num" id="dialnum">${num}</div>
       ${ios ? `<button class="paste-pop" id="paste">${S.fwdCopied ? 'Paste' : '(copy the code first)'}</button>` : '<div style="height:36px"></div>'}
       <div class="keys">${keys.map(([k, s]) => `<button class="key" data-k="${k}">${k}<small>${s}</small></button>`).join('')}</div>
-      <button class="callbtn" id="dial"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>
+      <div class="dialrow"><span></span><button class="callbtn" id="dial"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button><button class="bksp" id="bksp" aria-label="Delete">⌫</button></div>
     </div>`, T('hint_dialer'));
   const disp = $('#dialnum', o);
   o.addEventListener('click', e => {
     const k = e.target.closest('[data-k]');
     if (k) { num += k.dataset.k; disp.textContent = num; }
-    if (e.target.id === 'paste' && S.fwdCopied) { num = FWD_CODE; disp.textContent = num; e.target.style.visibility = 'hidden'; }
+    if (e.target.closest('#bksp')) { num = num.slice(0, -1); disp.textContent = num; }
+    if (e.target.id === 'paste' && S.fwdCopied) { num = FWD_CODE; disp.textContent = num; }
     if (e.target.closest('#dial')) {
-      if (num.replace(/\s/g, '') !== FWD_CODE) { toast(ios ? 'Paste the code first' : 'Code changed. Tap back and try again'); return; }
+      if (num.replace(/\s/g, '') !== FWD_CODE) { toast(!num ? (S.lang === 'hi' ? 'Pehle code paste karein' : 'Paste the code first') : (S.lang === 'hi' ? 'Code match nahi hua. ⌫ se hatakar dobara paste karein' : 'Code doesn\'t match. Clear it with ⌫ and paste again')); return; }
       carrierResult(o);
     }
   });
@@ -369,7 +353,7 @@ function openDialer() {
 function carrierResult(o) {
   const ios = S.os === 'ios';
   const c = document.createElement('div'); c.className = 'carrier';
-  c.innerHTML = `<div class="box ${ios ? '' : 'android'}"><p class="small" style="margin:0 0 10px;color:#aaa">${S.network} · ${ios ? 'Sending...' : 'USSD code running...'}</p></div>`;
+  c.innerHTML = `<div class="box ${ios ? '' : 'android'}"><p class="small" style="margin:0 0 10px;color:#aaa">${ios ? 'Sending...' : 'USSD code running...'}</p></div>`;
   o.appendChild(c);
   setTimeout(() => {
     c.innerHTML = S.sim === 2
@@ -403,7 +387,7 @@ function sysDialog(k) {
     const r = e.target.closest('[data-r]'); if (!r) return;
     d.remove();
     if (r.dataset.r === 'yes') { S.perms[k] = true; render(); }
-    else openSheet(`<h3 style="margin:0 0 6px">${S.lang === 'hi' ? 'Iske bina Sonic kaam nahi karega' : 'Sonic needs this to work'}</h3><p class="small" style="font-size:14px">${T('r_' + k + '_w')}</p><p class="small">${S.lang === 'hi' ? 'Aap ise kabhi bhi Settings mein band kar sakte hain.' : 'You can turn it off anytime in Settings.'}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-perm="${k}">${S.lang === 'hi' ? 'Dobara try karein' : 'Try again'}</button><button class="link" data-act="open-app-settings">${T('r_settings')}</button><button class="link" data-act="close-sheet">${S.lang === 'hi' ? 'Abhi nahi' : 'Not now'}</button></div>`);
+    else openSheet(`<h3 style="margin:0 0 6px">${T('perm_need_h')}</h3><p class="small" style="font-size:14px">${T('r_' + k + '_w')}</p><p class="small">${T('perm_need_p')}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-perm="${k}">${T('try_again')}</button><button class="link" data-act="open-app-settings">${T('r_settings')}</button><button class="link" data-act="close-sheet">${T('not_now')}</button></div>`);
   });
 }
 
@@ -413,7 +397,7 @@ function renderNotes() {
   const n = NOTES[key];
   $('#notesBody').innerHTML = n ? `<h3>${n.h}</h3><ul>${n.b.map(x => `<li>${x}</li>`).join('')}</ul><div class="worry"><b>User worry:</b> ${n.w}</div>` : '';
   const f = FLOW(); const cur = f.indexOf(key);
-  const all = ['welcome', 'what', 'choose', 'perms', 'phone', 'voicemail', 'forward', 'test', 'live'];
+  const all = ['welcome', 'what', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live'];
   $('#flowmap').innerHTML = `<div class="notes-head">Flow (${S.os === 'ios' ? 'iPhone' : 'Android'})</div><ol>${all.map((s, i) => {
     const inFlow = f.includes(s); const idx = f.indexOf(s);
     const cls = !inFlow ? 'skip' : s === key ? 'cur' : idx < cur ? 'done' : '';
@@ -422,7 +406,7 @@ function renderNotes() {
 }
 
 // ---------- render + events ----------
-const BGS = { welcome: '#EAF6EE', what: '#FFF1E4', choose: '#EFEAFF', phone: '#FFF7D6', perms: '#EAF6EE', voicemail: '#FFE9E6', forward: '#EFEAFF', test: '#FFF1E4', test_ok: '#EAF6EE', live: '#EAF6EE' };
+const BGS = { welcome: '#EAF6EE', what: '#FFF1E4', choose: '#EFEAFF', perms: '#EAF6EE', voicemail: '#FFE9E6', forward: '#EFEAFF', test: '#FFF1E4', test_ok: '#EAF6EE', live: '#EAF6EE' };
 function render() {
   screen.innerHTML = screens[S.step]();
   document.body.style.background = BGS[S.step] || '#EAF6EE';
@@ -437,8 +421,6 @@ phone.addEventListener('click', e => {
   if (d.tab) { S.tab = d.tab; return render(); }
   if (d.worry) { S.worry = S.worry === +d.worry ? null : +d.worry; render(); const tip = $('#worryTip'); if (tip) tip.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; }
   if (d.choice) { S.choice = d.choice; return render(); }
-  if (d.sim) { S.sim = +d.sim; return render(); }
-  if (d.net) { S.network = d.net; return render(); }
   if (d.perm) { closeSheet(); return sysDialog(d.perm); }
   switch (d.act) {
     case 'next': return nextStep();
@@ -447,7 +429,7 @@ phone.addEventListener('click', e => {
     case 'close-sheet': return closeSheet();
     case 'close-sheet-next': closeSheet(); return nextStep();
     case 'play': return playVideo();
-    case 'wifi': S.wifiOff = true; return render();
+    case 'sim-toggle': S.sim = S.sim === 1 ? 2 : 1; return render();
     case 'vm-cant': return openSheet(`<p style="font-size:15px;line-height:1.45">${T('v_cant_a')}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-act="vm-skip">${T('continue')}</button></div>`);
     case 'vm-skip': closeSheet(); return nextStep();
     case 'open-settings': S.ios.visited = true; return openIOSSettings();
@@ -483,11 +465,10 @@ phone.addEventListener('click', e => {
   }
 });
 
-function restart() { Object.assign(S, { step: 'welcome', choice: 'unknown', sim: 1, wifiOff: false, perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
+function restart() { Object.assign(S, { step: 'welcome', choice: 'all', sim: 1, perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
 
 document.querySelectorAll('[data-os]').forEach(b => b.onclick = () => {
   S.os = b.dataset.os; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x === b));
-  S.network = S.os === 'ios' ? S.network : 'Jio';
   if (!FLOW().includes(S.step) && S.step !== 'test_ok') S.step = 'perms';
   closeOutside();
 });
