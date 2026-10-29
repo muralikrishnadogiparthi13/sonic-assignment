@@ -9,7 +9,7 @@ const S = {
   perms: { contacts: false, notif: false, phone: false },
   ios: { lv: true, suc: true, visited: false }, name: 'Ananya', num: '98765 04120', fwdCopied: false, inDialer: false, testTries: 0, tab: 'del', worry: null,
 };
-const REQUIRED = () => S.os === 'ios' ? ['contacts'] : ['contacts', 'phone'];
+const REQUIRED = () => S.os === 'ios' ? ['contacts'] : ['contacts', 'phone', 'notif'];
 
 // Line icons (24px, stroke) instead of emoji, to match Onest and the illustrations.
 const IP = {
@@ -43,15 +43,15 @@ const NM = v => typeof v === 'string' ? v.replaceAll('Ananya', S.name || 'Ananya
 const T = k => NM(COPY[S.lang][k] ?? COPY.en[k] ?? k);
 
 const FLOW = () => S.os === 'ios'
-  ? ['welcome', 'what', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live']
-  : ['welcome', 'what', 'you', 'choose', 'perms', 'forward', 'test', 'live'];
+  ? ['welcome', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live']
+  : ['welcome', 'you', 'choose', 'perms', 'forward', 'test', 'live'];
 const LABELS = { welcome: 'Welcome + explainer', what: 'What Sonic handles', you: 'Your name', choose: 'Choose which calls', perms: 'Permissions', voicemail: 'Turn off iPhone voicemail', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
 
 // ---------- helpers ----------
 function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => toastEl.classList.remove('on'), 1600); }
 function openSheet(html) { sheet.innerHTML = '<div class="grab"></div>' + html; sheet.classList.add('on'); backdrop.classList.add('on'); }
 function closeSheet() { sheet.classList.remove('on'); backdrop.classList.remove('on'); }
-backdrop.onclick = closeSheet;
+backdrop.onclick = () => { stopVideo(); closeSheet(); };
 function go(step) { S.step = step; stopVideo(); stopAudio(); render(); }
 function nextStep() { const f = FLOW(); go(f[Math.min(f.indexOf(S.step) + 1, f.length - 1)]); }
 function prevStep() { const f = FLOW(); go(f[Math.max(f.indexOf(S.step) - 1, 0)]); }
@@ -83,17 +83,18 @@ function fwdClip() { return S.os === 'ios' ? 'forward_ios' : 'forward_and'; }
 const screens = {};
 
 screens.welcome = () => `
-  <div class="body" style="padding-top:18px">
+  <div class="body" style="padding-top:24px">
     <h1>${T('w_title')}</h1>
     <p class="lede">${T('w_lede')}</p>
-    ${videoBlock()}
-    <p class="vlen">${T('w_play')} · ${T('w_len')}</p>
+    <div class="wrows">${T('w_rows').map(([i, h, p]) => `<div class="wrow"><div class="ico n">${ic(i)}</div><div><b>${h}</b><p>${p}</p></div></div>`).join('')}</div>
+    <p class="rings">${T('d_rings')}</p>
     <div class="row" style="align-items:center;gap:10px;margin-top:14px">
-      <div class="ico p" style="width:34px;height:34px;border-radius:12px">${ic('shield', 18)}</div>
+      <div class="ico n" style="width:34px;height:34px;border-radius:12px">${ic('shield', 18)}</div>
       <p class="small" style="margin:0">${T('w_trust')}</p>
     </div>
   </div>
   <div class="footer">
+    <button class="link watch" data-act="watch">${ic('speaker', 18)} ${T('w_watch')}</button>
     <button class="cta" data-act="next">${T('w_cta')}</button>
     <button class="link" data-act="later">${T('w_how')}</button>
   </div>`;
@@ -131,7 +132,7 @@ screens.choose = () => {
   const opt = (k, h, p, badge, icon) => `
     <button class="opt ${S.choice === k ? 'sel' : ''}" data-choice="${k}">
       ${badge ? `<span class="badge">${T('c_rec')}</span>` : ''}
-      <div class="row"><div class="ico ${k === 'all' ? 'p' : 'n'}">${ic(icon)}</div><div><h3>${T(h)}</h3><p>${T(p)}</p>${k === 'all' ? `<p class="hear">${T('c2_hear')}</p>` : ''}</div></div><span class="radio"></span>
+      <div class="row"><div class="ico ${k === 'all' ? 'p' : 'n'}">${ic(icon)}</div><div><h3>${T(h)}</h3><p>${T(p)}</p>${k === 'all' ? `<p class="hear">${T('c2_hear')}</p>` : `<p class="hear muted">${T('c1_saved')}</p>`}</div></div><span class="radio"></span>
     </button>`;
   return `${appbar()}
   <div class="body">
@@ -156,13 +157,13 @@ screens.perms = () => {
       ${list.map(k => `
         <div class="lrow">
           <div class="ico ${ico[k][0]}">${ic(ico[k][1])}</div>
-          <div class="t"><b>${T('r_' + k)}${k === 'notif' ? ` <small style="font-weight:600;color:#9C9CAA">· ${T('r_opt')}</small>` : ''}</b><span>${T(k === 'contacts' && S.choice === 'unknown' ? 'r_contacts_w2' : 'r_' + k + '_w')}</span></div>
-          ${S.perms[k] ? `<span class="done-tick" aria-label="Allowed">${ic('check', 22)}</span>` : `<button class="pill-sm ${k === 'notif' ? 'ghostpill' : 'on'}" data-perm="${k}">${T('allow')}</button>`}
+          <div class="t"><b>${T('r_' + k)}${k === 'notif' && S.os === 'ios' ? ` <small style="font-weight:600;color:#9C9CAA">· ${T('r_opt')}</small>` : ''}</b><span>${T(k === 'contacts' && S.choice === 'unknown' ? 'r_contacts_w2' : 'r_' + k + '_w')}</span></div>
+          ${S.perms[k] ? `<span class="done-tick" aria-label="Allowed">${ic('check', 22)}</span>` : `<button class="pill-sm ghostpill" data-perm="${k}">${T('allow')}</button>`}
         </div>`).join('')}
     </div>
-    <div class="promise">${ic('lock', 18)}<span>${T('r_never')}</span></div>
+    <p class="capline">${ic('lock', 15)} ${T('r_never')}</p>
   </div>
-  <div class="footer">${all ? '' : `<p class="ctanote">${T(S.os === 'ios' ? 'r_need' : 'r_need_and')}</p>`}<button class="cta" data-act="next" ${all ? '' : 'disabled'}>${T('continue')}</button></div>`;
+  <div class="footer">${all ? `<button class="cta" data-act="next">${T('continue')}</button>` : `<button class="cta" data-act="allow-all">${T('r_all')}</button>`}</div>`;
 };
 
 screens.voicemail = () => `${appbar('voicemail')}
@@ -204,16 +205,14 @@ screens.forward = () => {
   return `${appbar(fwdClip())}
   <div class="body">
     <h2>${T('f_title')}</h2>
-    ${fwdAnim()}
-    <div class="codecard">
+    <div class="codecard big">
       <p class="lede" style="margin:0 0 10px">${T('f_lede')}</p>
       <div class="code"><span>${codeHtml()}</span></div>
-      <p class="small" style="margin:8px 0 0">${T('f_inside')}</p>
+      <p class="small" style="margin:10px 0 0">${T('f_tells')}</p>
+      ${ios ? '' : `<div class="simline">${ic('mobile', 15)} From SIM ${S.sim} · ${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'} <button class="link" data-act="sim-toggle">${T('x_change')}</button></div>`}
     </div>
     <ol class="steps tight">${T(ios ? 'f_then_i' : 'f_then_a').map(t => `<li><p>${t}</p></li>`).join('')}</ol>
-    ${!ios && !S.perms.notif ? `<div class="trap">${ic('bell', 18)}<span>${T('f_nonotif')}</span></div>` : ''}
-    <div class="assure"><div>${ic('undo', 16)} ${T('f_undo')}</div><div>${ic('shield', 16)} ${T('f_down')}</div></div>
-    ${ios ? '' : `<div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b>. ${T('f_sim_ask')}</span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>`}
+    <p class="capline">${ic(!ios && !S.perms.notif ? 'bell' : 'undo', 15)} ${T(!ios && !S.perms.notif ? 'f_nonotif' : 'f_undo_line')}</p>
   </div>
   <div class="footer"><button class="cta" data-act="open-dialer">${ios ? T('f_open_phone') : T('f_open_dialer')}</button><button class="link helpl" data-act="help">${ic('help', 18)} ${T('help')}</button></div>`;
 };
@@ -222,12 +221,10 @@ screens.test = () => `${appbar('test')}
   <div class="body">
     <h2>${T('x_title')}</h2>
     <p class="lede">${T('x_lede')}</p>
-    <div class="card testcard">
-      <div class="callrow"><span>We'll call <b>${S.os === 'ios' ? '+91 ' + S.num : (S.sim === 1 ? '98xxx x4120' : '70xxx x8812')}</b></span><button class="link" data-act="change-num">${T('x_change')}</button></div>
-      <p class="small" style="margin:6px 0 0">${T('x_hold')}</p>
-      <div class="pressred"><span class="redbtn">${ic('phone', 30)}</span><b>${T('x_press')}</b></div>
-      <p class="small" style="margin:12px 0 0">${T('x_slide')}</p>
-    </div>
+    <div class="callrow"><span>We'll call <b>${S.os === 'ios' ? '+91 ' + S.num : (S.sim === 1 ? '98xxx x4120' : '70xxx x8812')}</b></span><button class="link" data-act="change-num">${T('x_change')}</button></div>
+    <div class="hero-red"><span class="redbtn big">${ic('phone', 44)}</span><b>${T('x_press')}</b></div>
+    <p class="small center">${T('x_hold')}</p>
+    ${S.os === 'ios' ? `<p class="small center">${T('x_slide')}</p>` : ''}
     ${S.testTries > 0 ? `<div class="tip">${T('x_pick')}</div>` : ''}
   </div>
   <div class="footer"><button class="cta" data-act="call-me">${T('x_cta')}</button><button class="link" data-act="noring">${T('x_noring')}</button></div>`;
@@ -238,7 +235,7 @@ screens.test_ok = () => `
     <h2>${T('x_ok_h')}</h2>
     <p class="lede">${T('x_ok_p')}</p>
     <div class="bubbles"><div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span>${T('x_line')}</div></div>
-    <div class="facts"><div>${ic('mobile', 18)} ${T('x_f1')}</div><div>${ic('undo', 18)} ${T('x_f2')}</div></div>
+    <div class="facts"><div>${ic('mobile', 18)} ${T('x_f1')}</div><div>${ic('undo', 18)} ${T('x_f2')}</div><div>${ic('bell', 18)} ${T('x_f3')}</div></div>
     
   </div>
   <div class="footer"><button class="cta" data-act="to-live">${T('x_finish')}</button></div>`;
@@ -248,16 +245,16 @@ screens.live = () => `
     <h1 class="livehead"><span class="livedot" aria-hidden="true"></span>${T('l_title')}</h1>
     <p class="lede">${T('l_lede')}</p>
     <div class="notif urg"><div class="dot">${ic('bell', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_n1t')}</b><p>${T('l_n1b')}</p></div></div>
-    <div class="notif"><div class="dot">${ic('scooter', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_n2t')}</b><p>${T('l_n2b')}</p></div></div>
     <div class="notif"><div class="dot" style="background:#3a3a42">${ic('ban', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_n3t')}</b><p>${T('l_n3b')}</p></div></div>
-    <p class="small" style="margin:10px 0 0"><b style="color:#fff">${S.choice === 'all' ? T('l_mode_a') : T('l_mode_u')}</b> · ${T('l_mode_c')}</p>
+    <div class="notif"><div class="dot" style="background:#3a3a42">${ic('users', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_tt')}</b><p>${T('l_tb')}</p><div class="tt"><button class="pill-sm ghostpill">${T('l_keep')}</button><button class="pill-sm ghostpill">${T('l_switch')}</button></div></div></div>
+    <p class="capline">${ic('scooter', 15)} ${T('l_deliv')}</p>
     <div class="nextcard">
       <h3 style="margin:0 0 4px;font-size:16px">${T('l_next_h')}</h3><p class="small" style="margin:0 0 12px;color:#C9C9D3">${T('l_next_p')}</p>
       <button class="cta2" data-act="deliv">${T('l_next')}</button>
     </div>
-    <p class="small">${T('l_pause')}</p>
+    <p class="small">${T('l_foot')}</p>
   </div>
-  <div class="footer"><button class="link" data-act="restart">${'Restart prototype'}</button></div>`;
+  <div class="footer"><button class="link" data-act="restart">Restart prototype</button></div>`;
 
 // ---------- explainer video (voiceover + illustrated scenes) ----------
 const SCENES = [
@@ -422,8 +419,8 @@ function sysDialog(k) {
   d.addEventListener('click', e => {
     const r = e.target.closest('[data-r]'); if (!r) return;
     d.remove();
-    if (r.dataset.r === 'yes') { S.perms[k] = true; render(); }
-    else openSheet(`<h3 style="margin:0 0 6px">${T('perm_need_h')}</h3><p class="small" style="font-size:14px">${T('r_' + k + '_w')}</p><p class="small">${T('perm_need_p')}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-perm="${k}">${T('try_again')}</button><button class="link" data-act="open-app-settings">${T('r_settings')}</button><button class="link" data-act="close-sheet">${T('not_now')}</button></div>`);
+    if (r.dataset.r === 'yes') { S.perms[k] = true; render(); const n = (S.queue || []).shift(); if (n) setTimeout(() => sysDialog(n), 250); }
+    else { S.queue = []; openSheet(`<h3 style="margin:0 0 6px">${T('perm_need_h')}</h3><p class="small" style="font-size:14px">${T('r_' + k + '_w')}</p><p class="small">${T('perm_need_p')}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-perm="${k}">${T('try_again')}</button><button class="link" data-act="open-app-settings">${T('r_settings')}</button><button class="link" data-act="close-sheet">${T('not_now')}</button></div>`); }
   });
 }
 
@@ -470,6 +467,9 @@ phone.addEventListener('click', e => {
     case 'play': return playVideo();
     case 'change-num': return go('you');
     case 'di-toggle': return t.classList.toggle('open');
+    case 'watch': openSheet(`${videoBlock()}<div class="footer" style="padding:6px 0 0"><button class="link" data-act="close-video">${T('gotit')}</button></div>`); return playVideo();
+    case 'close-video': stopVideo(); return closeSheet();
+    case 'allow-all': { S.queue = (S.os === 'ios' ? ['contacts', 'notif'] : ['contacts', 'phone', 'notif']).filter(k => !S.perms[k]); const k = S.queue.shift(); return k && sysDialog(k); }
     case 'listen': return toggleListen(t);
     case 'help': return openSheet(`<h3 style="margin:0 0 14px">${T('help_h')}</h3>
       <div class="helplist">

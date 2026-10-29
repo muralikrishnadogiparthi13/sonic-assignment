@@ -515,3 +515,47 @@ h2{font-size:22px;line-height:1.2;margin:0 0 8px;font-weight:800}
 .callrow b{color:#fff}
 .callrow .link{font-size:14px;color:#C9B6FF;min-height:36px;padding:4px 6px}
 .outside:not(.and) .breadcrumb{left:14px}
+
+/* v4 colour system: green = primary button only, purple = Sonic, neutral everything else, no yellow */
+.progress i{background:var(--purple)}
+.badge{background:transparent;border:1px solid var(--purple);color:#DCD0FF}
+.livedot{background:var(--purple)}
+.ico.g,.ico.a,.ico.c{background:var(--surface2);color:#D6D6DE}
+.tip,.assure,.trap{background:transparent;border:1px solid var(--line);color:#D6D6DE}
+.tip b{color:#fff}
+.trap{font-weight:600}
+.done-tick{background:var(--surface2);color:#C9B6FF}
+.copy.done{background:var(--surface2);color:#C9B6FF}
+.nxi.ok{background:var(--surface2);color:#fff}
+.facts svg{color:#C9B6FF}
+.chip.on{border-color:#C9B6FF;color:#DCD0FF}
+.notif.urg .dot{background:#3a3a42}
+.carrier b.act{color:#fff}
+.cta2{border-color:#5b5b68;color:#E4E4EC}
+.pointer::after{background:#26262C;color:#fff}
+/* layout pieces */
+.wrows{display:flex;flex-direction:column;gap:14px;margin:4px 0 0}
+.wrow{display:flex;gap:12px;align-items:flex-start}
+.wrow .ico{width:40px;height:40px}
+.wrow b{font-size:16.5px}
+.wrow p{margin:2px 0 0;font-size:15px;color:#C8C8D2;line-height:1.4}
+.rings{margin:20px 0 0;font-size:16.5px;font-weight:700;line-height:1.4}
+.footer .watch{display:inline-flex;align-items:center;gap:8px;align-self:center;color:#DCD0FF;font-size:15px}
+.footer .watch svg{vertical-align:0!important}
+.sheet .video{margin:0 0 6px}
+.opt p.hear.muted{color:#B4B4C0}
+.capline{display:flex;gap:8px;align-items:flex-start;font-size:14px;line-height:1.4;color:#B4B4C0;margin:14px 0 0}
+.capline svg{flex:none;margin-top:2px;vertical-align:0!important}
+.codecard.big{padding:18px 16px;margin-top:6px}
+.codecard.big .code{font-size:20px;padding:14px}
+.simline{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:#D6D6DE}
+.simline .link{font-size:14px;color:#C9B6FF;min-height:32px;padding:2px 4px;margin-left:auto}
+.simline svg{vertical-align:0!important}
+.hero-red{display:flex;flex-direction:column;align-items:center;gap:12px;margin:28px 0 18px}
+.redbtn.big{width:112px;height:112px}
+.hero-red b{font-size:26px}
+.small.center{text-align:center;margin:6px 0 0}
+.callrow{margin-top:4px}
+.tt{display:flex;gap:8px;margin-top:8px}
+.tt .pill-sm{min-height:34px;padding:6px 12px;font-size:13px}
+.wrows{gap:10px}.wrow p{font-size:14.5px}.rings{margin-top:14px;font-size:16px}

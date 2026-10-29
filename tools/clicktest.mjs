@@ -8,11 +8,11 @@ try {
   for (const os of ['android', 'ios']) {
     await b.goto(base + '?os=' + os);
     await log(os + ' start');
-    await b.click('[data-act=play]'); await b.sleep(1500);
-    await b.eval('document.querySelector("#video .vscene.on")?.dataset.scene').then(v => console.log('  video scene', v));
-    await b.click('[data-act=next]'); await log('-> what');
-    console.log('  three jobs visible:', await b.eval('document.querySelectorAll(".job").length')); await b.click('[data-worry="3"]');
-    console.log('  tip shown:', await b.eval('!!document.querySelector(".tip")'));
+    await b.click('[data-act=watch]'); await b.sleep(1500);
+    await b.eval('document.querySelector("#video .vscene.on")?.dataset.scene').then(v => console.log('  video scene', v)); await b.click('[data-act=close-video]');
+    await log('-> (what merged into welcome)');
+    console.log('  welcome rows:', await b.eval('document.querySelectorAll(".wrow").length'));
+
     await b.click('[data-act=next]'); await log('-> you'); await b.click('[data-act=next]'); await log('-> choose');
     await b.click('[data-choice=all]'); await b.click('[data-act=next]'); await log('-> perms');
     const perms = os === 'ios' ? ['contacts', 'notif'] : ['contacts', 'phone', 'notif'];
@@ -20,8 +20,8 @@ try {
     await b.click(`[data-perm=${perms[0]}]`); await b.click('.sysdlg [data-r=no]');
     console.log('  deny sheet has Open Settings:', await b.eval('!!document.querySelector("#sheet [data-act=open-app-settings]")'));
     await b.click(`#sheet [data-perm=${perms[0]}]`); await b.click('.sysdlg [data-r=yes]');
-    for (const p of perms.slice(1, -1)) { await b.click(`[data-perm=${p}]`); await b.click('.sysdlg [data-r=yes]'); }
-    console.log('  continue enabled without optional notif:', !(await b.eval('document.querySelector(".footer .cta").disabled')));
+    if (await b.eval('!!document.querySelector("[data-act=allow-all]")')) { await b.click('[data-act=allow-all]'); for (const p of perms.slice(1)) { await b.sleep(400); await b.click('.sysdlg [data-r=yes]'); } }
+    console.log('  continue after allow all:', await b.eval('document.querySelector(".footer .cta").dataset.act'));
     await b.shot(`${out}/ct_${os}_perms.png`);
     await b.click('[data-act=next]'); await log('-> next after perms');
     if (os === 'ios') {
@@ -61,8 +61,8 @@ b.close();
 const f = await launch({ port: 9356 });
 try {
   await f.goto(base + '?os=android');
-  await f.eval(`(()=>{const go=s=>document.querySelector(s).click(); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]');})()`); await f.sleep(300);
-  for (const p of ['contacts', 'phone']) { await f.click(`[data-perm=${p}]`); await f.click('.sysdlg [data-r=yes]'); }
+  await f.eval(`(()=>{const go=s=>document.querySelector(s).click(); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]');})()`); await f.sleep(300);
+  for (const p of ['contacts', 'phone', 'notif']) { await f.click(`[data-perm=${p}]`); await f.click('.sysdlg [data-r=yes]'); }
   await f.click('[data-act=next]'); await f.click('[data-act=sim-toggle]');
   await f.click('[data-act=open-dialer]'); await f.click('#dial'); await f.sleep(1600);
   console.log('failure dialog:', await f.eval('document.querySelector(".carrier")?.innerText.replace(/\\s+/g," ")'));
