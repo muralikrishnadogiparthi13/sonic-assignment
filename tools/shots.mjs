@@ -12,7 +12,7 @@ async function phoneShot(name) {
   const s = await b.send('Page.captureScreenshot', { format: 'png', clip: { x: r.x, y: r.y, width: r.w, height: r.h, scale: 1 } });
   fs.writeFileSync(out + name + '.png', Buffer.from(s.result.data, 'base64'));
 }
-const steps = ['welcome', 'what', 'you', 'choose', 'perms', 'forward', 'test', 'test_ok', 'live'];
+const steps = ['welcome', 'you', 'choose', 'perms', 'forward', 'test', 'test_ok', 'live'];
 for (const st of steps) { await b.goto(base + '?os=android&lang=en&step=' + st); await b.eval('document.fonts.ready'); await phoneShot('android_' + st); }
 await b.goto(base + '?os=ios&step=voicemail'); await phoneShot('ios_voicemail');
 await b.goto(base + '?os=ios&step=forward'); await phoneShot('ios_forward');

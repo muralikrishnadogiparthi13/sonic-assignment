@@ -45,7 +45,7 @@ const T = k => NM(COPY[S.lang][k] ?? COPY.en[k] ?? k);
 const FLOW = () => S.os === 'ios'
   ? ['welcome', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live']
   : ['welcome', 'you', 'choose', 'perms', 'forward', 'test', 'live'];
-const LABELS = { welcome: 'Welcome + explainer', what: 'What Sonic handles', you: 'Your name', choose: 'Choose which calls', perms: 'Permissions', voicemail: 'Turn off iPhone voicemail', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
+const LABELS = { welcome: 'Welcome: what Sonic does', you: 'Your name', choose: 'Choose which calls', perms: 'Permissions', voicemail: 'Change 2 iPhone settings', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
 
 // ---------- helpers ----------
 function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => toastEl.classList.remove('on'), 1600); }
@@ -430,7 +430,7 @@ function renderNotes() {
   const n = NOTES[key];
   $('#notesBody').innerHTML = n ? `<h3>${n.h}</h3><ul>${n.b.map(x => `<li>${x}</li>`).join('')}</ul><div class="worry"><b>User worry:</b> ${n.w}</div>` : '';
   const f = FLOW(); const cur = f.indexOf(key);
-  const all = ['welcome', 'what', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live'];
+  const all = ['welcome', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live'];
   $('#flowmap').innerHTML = `<div class="notes-head">Flow (${S.os === 'ios' ? 'iPhone' : 'Android'})</div><ol>${all.map((s, i) => {
     const inFlow = f.includes(s); const idx = f.indexOf(s);
     const cls = !inFlow ? 'skip' : s === key ? 'cur' : idx < cur ? 'done' : '';
