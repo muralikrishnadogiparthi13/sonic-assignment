@@ -559,3 +559,8 @@ h2{font-size:22px;line-height:1.2;margin:0 0 8px;font-weight:800}
 .tt{display:flex;gap:8px;margin-top:8px}
 .tt .pill-sm{min-height:34px;padding:6px 12px;font-size:13px}
 .wrows{gap:10px}.wrow p{font-size:14.5px}.rings{margin-top:14px;font-size:16px}
+/* no tint inside Apple's Settings: an app can't do that */
+.ios-row.target{background:#fff}
+/* test screen: centre the red-button hero in the free space */
+.body:has(.hero-red){display:flex;flex-direction:column}
+.hero-red{margin:auto 0;padding:24px 0}
