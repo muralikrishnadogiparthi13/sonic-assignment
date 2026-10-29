@@ -36,7 +36,7 @@ en: {
   c_f1:['Call','Rings on your phone','Missed','Sonic answers'],
   c_change:'After your first family call, Sonic will ask if you want to keep this.',
   // permissions
-  r_title:'Let Sonic see your contacts', r_all:'Allow all', r_all_n:'Allow both',
+  r_title:'Sonic needs 3 things', r_title_ios:'Sonic needs 2 things', r_all:'Allow all', r_all_n:'Allow both',
   r_lede:'Your phone will show a box. Tap Allow.',
   r_contacts:'Contacts', r_contacts_w:'To greet family by name and spot strangers.', r_contacts_w2:'So Sonic knows your saved contacts and never answers them.',
   r_notif:'Notifications', r_notif_w:'To guide you in the Phone app, and for urgent alerts.',

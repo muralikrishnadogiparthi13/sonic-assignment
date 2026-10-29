@@ -151,7 +151,7 @@ screens.perms = () => {
   const all = REQUIRED().every(k => S.perms[k]);
   return `${appbar('perms')}
   <div class="body">
-    <h2>${T('r_title')}</h2>
+    <h2>${T(S.os === 'ios' ? 'r_title_ios' : 'r_title')}</h2>
     <p class="lede">${T('r_lede')}</p>
     <div class="card" style="padding:4px 16px">
       ${list.map(k => `
@@ -536,6 +536,8 @@ const q = new URLSearchParams(location.search);
 if (q.get('os') === 'android') { S.os = 'android'; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x.dataset.os === 'android')); }
 if (q.get('os') === 'ios') { S.os = 'ios'; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x.dataset.os === 'ios')); }
 if (q.get('step') && screens[q.get('step')]) S.step = q.get('step');
+// deep links past the permissions step assume they were granted, as in the real flow
+if (FLOW().indexOf(S.step) > FLOW().indexOf('perms')) S.perms = { contacts: true, notif: true, phone: true };
 const tick = () => { const d = new Date(); $('#clock').textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
 tick(); setInterval(tick, 30000);
 render();
