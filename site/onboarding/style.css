@@ -498,3 +498,20 @@ h2{font-size:22px;line-height:1.2;margin:0 0 8px;font-weight:800}
 .outside .key{width:70px;height:70px;font-size:27px}
 .outside .dialrow{grid-template-columns:70px 70px 70px;gap:22px;margin-top:12px}
 .outside .callbtn{width:70px;height:70px}
+
+/* v3.2: Dynamic Island (static steps, long-press to expand) and a heads-up that settles into the shade */
+.di{position:absolute;top:-38px;left:50%;transform:translateX(-50%);z-index:20;background:#000;color:#fff;border-radius:22px;width:176px;padding:7px 12px;cursor:pointer;transition:width .25s,border-radius .25s}
+.di-pill{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.di-pill svg{vertical-align:0!important;flex:none}
+.di-list{display:none;margin-top:8px}
+.di.open{width:340px;border-radius:28px;padding:12px 14px}
+.di.open .di-list{display:block}
+.di .la-i{color:#E4E4EC}
+.di .la-i i{background:#2a2a2e;color:#fff}
+.phone.out .statusbar #clock{visibility:hidden}
+.an{transition:opacity .4s,transform .4s}
+.an.gone{opacity:0;transform:translateY(-20px);pointer-events:none;height:0;margin:0;padding:0;overflow:hidden}
+.callrow{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:15px;color:#C8C8D2}
+.callrow b{color:#fff}
+.callrow .link{font-size:14px;color:#C9B6FF;min-height:36px;padding:4px 6px}
+.outside:not(.and) .breadcrumb{left:14px}

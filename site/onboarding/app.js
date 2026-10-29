@@ -210,10 +210,8 @@ screens.forward = () => {
       <div class="code"><span>${codeHtml()}</span></div>
       <p class="small" style="margin:8px 0 0">${T('f_inside')}</p>
     </div>
-    <ol class="steps tight">
-      <li><p>${T(ios ? 'f_then_i' : 'f_then_a')}</p></li>
-      <li><p>${T('f_act')}</p></li>
-    </ol>
+    <ol class="steps tight">${T(ios ? 'f_then_i' : 'f_then_a').map(t => `<li><p>${t}</p></li>`).join('')}</ol>
+    ${!ios && !S.perms.notif ? `<div class="trap">${ic('bell', 18)}<span>${T('f_nonotif')}</span></div>` : ''}
     <div class="assure"><div>${ic('undo', 16)} ${T('f_undo')}</div><div>${ic('shield', 16)} ${T('f_down')}</div></div>
     ${ios ? '' : `<div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b>. ${T('f_sim_ask')}</span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>`}
   </div>
@@ -225,8 +223,10 @@ screens.test = () => `${appbar('test')}
     <h2>${T('x_title')}</h2>
     <p class="lede">${T('x_lede')}</p>
     <div class="card testcard">
-      <p class="small" style="margin:0">${'We\'ll call'} <b style="color:#fff">${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b>. ${T('x_hold')}</p>
+      <div class="callrow"><span>We'll call <b>${S.os === 'ios' ? '+91 ' + S.num : (S.sim === 1 ? '98xxx x4120' : '70xxx x8812')}</b></span><button class="link" data-act="change-num">${T('x_change')}</button></div>
+      <p class="small" style="margin:6px 0 0">${T('x_hold')}</p>
       <div class="pressred"><span class="redbtn">${ic('phone', 30)}</span><b>${T('x_press')}</b></div>
+      <p class="small" style="margin:12px 0 0">${T('x_slide')}</p>
     </div>
     ${S.testTries > 0 ? `<div class="tip">${T('x_pick')}</div>` : ''}
   </div>
@@ -323,10 +323,11 @@ function artSetup() { return svg(`${card(60, 24, 200, 152)}${['Choose calls', 'A
 
 // ---------- "outside the app" scenes ----------
 // Sonic can't draw on other apps. iPhone: a Live Activity at the top. Android: an ongoing notification.
-function liveAct(items, done) {
-  return `<div class="la" role="status"><div class="la-h">${sonicMini()} ${T('la_title')}<span>${Math.min(done, items.length)}/${items.length}</span></div>${items.map((t, i) => `<div class="la-i ${i < done ? 'done' : i === done ? 'now' : ''}"><i>${i < done ? ic('check', 12) : i + 1}</i>${t}</div>`).join('')}</div>`;
+function liveAct(items) {
+  return `<div class="di" data-act="di-toggle" role="status"><div class="di-pill">${sonicMini()}<span>${T('la_pill')}</span></div><div class="di-list">${items.map((t, i) => `<div class="la-i"><i>${i + 1}</i>${t}</div>`).join('')}</div></div>`;
 }
 function andNote(text) {
+  setTimeout(() => document.querySelector('.an')?.classList.add('gone'), 4500);
   return `<div class="an" role="status"><div class="an-h"><span class="an-ic">${sonicMini()}</span>Sonic · ${T('la_title')} · now</div><p>${text}</p><button data-act="close-outside">${T('la_back')}</button></div>`;
 }
 function outside(html, hint) { const o = document.createElement('div'); o.className = 'outside' + (S.os === 'android' ? ' and' : ''); o.innerHTML = (S.os === 'android' ? '' : `<button class="breadcrumb" data-act="close-outside"><svg viewBox="0 0 10 10" width="8" height="8"><path d="M8 1L2 5l6 4z" fill="currentColor"/></svg> Sonic</button>`) + html; phone.appendChild(o); phone.classList.add('out'); setHint(hint); return o; }
@@ -334,8 +335,7 @@ function closeOutside() { phone.querySelectorAll('.outside,.sysdlg').forEach(n =
 
 function openIOSSettings() {
   const sw = (k, on) => `<button class="ios-switch ${on ? '' : 'off'}" data-ios="${k}"></button>`;
-  const done = (!S.ios.lv ? 1 : 0) + (!S.ios.suc ? 1 : 0);
-  const o = outside(`${liveAct(['Turn off Live Voicemail', 'Set Screen Unknown Callers to Never', 'Tap "Sonic" at the top left'], done === 2 ? 2 : (!S.ios.lv ? 1 : 0))}<div class="ios-settings">
+  const o = outside(`${liveAct(['Turn off Live Voicemail', 'Set Screen Unknown Callers to Never', 'Tap "Sonic" at the top left'])}<div class="ios-settings">
     <div class="nav"><span>‹ Apps</span><b style="color:#000">Phone</b><span style="width:40px"></span></div>
     <div class="ios-group">
       <div class="ios-row">My Number <span class="val">+91 98xxx x4120</span></div>
@@ -367,14 +367,14 @@ function openDialer() {
   const ios = S.os === 'ios';
   let num = ios ? '' : FWD_CODE;
   const keys = [['1', ''], ['2', 'ABC'], ['3', 'DEF'], ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'], ['7', 'PQRS'], ['8', 'TUV'], ['9', 'WXYZ'], ['*', ''], ['0', '+'], ['#', '']];
-  const o = outside(`${ios ? `<div id="laDial">${liveAct(T('la_ios_dial'), 0)}</div>` : andNote(T('la_and_dial'))}<div class="dialer ${ios ? 'ios' : 'android'}">
+  const o = outside(`${ios ? liveAct(T('la_ios_dial')) : andNote(T('la_and_dial'))}<div class="dialer ${ios ? 'ios' : 'android'}">
       <div class="dial-num" id="dialnum">${num}</div>
       ${ios ? `<button class="paste-pop" id="paste">Paste</button>` : '<div style="height:36px"></div>'}
       <div class="keys">${keys.map(([k, s]) => `<button class="key" data-k="${k}">${k}<small>${s}</small></button>`).join('')}</div>
       <div class="dialrow"><span></span><button class="callbtn" id="dial"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button><button class="bksp" id="bksp" aria-label="Delete">${ic('bksp', 26)}</button></div>
     </div>`, T('hint_dialer'));
   const disp = $('#dialnum', o);
-  const callHint = () => { if (ios) $('#laDial', o).innerHTML = liveAct(T('la_ios_dial'), 1); };
+  const callHint = () => {};
   o.addEventListener('click', e => {
     const k = e.target.closest('[data-k]');
     if (k) { num += k.dataset.k; disp.textContent = num; }
@@ -389,7 +389,6 @@ function openDialer() {
 function carrierResult(o) {
   const ios = S.os === 'ios';
   const c = document.createElement('div'); c.className = 'carrier';
-  if (ios && $('#laDial', o)) $('#laDial', o).innerHTML = liveAct(T('la_ios_dial'), 2);
   c.innerHTML = `<div class="box ${ios ? '' : 'android'}"><p class="small" style="margin:0 0 10px;color:#aaa">${ios ? 'Sending...' : 'USSD code running...'}</p></div>`;
   o.appendChild(c);
   setTimeout(() => {
@@ -469,6 +468,8 @@ phone.addEventListener('click', e => {
     case 'close-sheet': return closeSheet();
     case 'close-sheet-next': closeSheet(); return nextStep();
     case 'play': return playVideo();
+    case 'change-num': return go('you');
+    case 'di-toggle': return t.classList.toggle('open');
     case 'listen': return toggleListen(t);
     case 'help': return openSheet(`<h3 style="margin:0 0 14px">${T('help_h')}</h3>
       <div class="helplist">
