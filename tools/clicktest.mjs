@@ -11,9 +11,9 @@ try {
     await b.click('[data-act=play]'); await b.sleep(1500);
     await b.eval('document.querySelector("#video .vscene.on")?.dataset.scene').then(v => console.log('  video scene', v));
     await b.click('[data-act=next]'); await log('-> what');
-    await b.click('[data-tab=spam]'); await b.click('[data-worry="1"]');
+    console.log('  three jobs visible:', await b.eval('document.querySelectorAll(".job").length')); await b.click('[data-worry="3"]');
     console.log('  tip shown:', await b.eval('!!document.querySelector(".tip")'));
-    await b.click('[data-act=next]'); await log('-> choose');
+    await b.click('[data-act=next]'); await log('-> you'); await b.click('[data-act=next]'); await log('-> choose');
     await b.click('[data-choice=all]'); await b.click('[data-act=next]'); await log('-> perms');
     const perms = os === 'ios' ? ['contacts', 'notif'] : ['contacts', 'phone', 'notif'];
     console.log('  cta disabled before perms:', await b.eval('document.querySelector(".footer .cta").disabled'));
@@ -61,7 +61,7 @@ b.close();
 const f = await launch({ port: 9356 });
 try {
   await f.goto(base + '?os=android');
-  await f.eval(`(()=>{const go=s=>document.querySelector(s).click(); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]');})()`); await f.sleep(300);
+  await f.eval(`(()=>{const go=s=>document.querySelector(s).click(); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]'); go('[data-act=next]');})()`); await f.sleep(300);
   for (const p of ['contacts', 'phone']) { await f.click(`[data-perm=${p}]`); await f.click('.sysdlg [data-r=yes]'); }
   await f.click('[data-act=next]'); await f.click('[data-act=sim-toggle]');
   await f.click('[data-act=open-dialer]'); await f.click('#dial'); await f.sleep(1600);

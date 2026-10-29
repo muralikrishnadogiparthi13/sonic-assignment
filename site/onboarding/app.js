@@ -7,7 +7,7 @@ const S = {
   os: 'android', lang: 'en', step: 'welcome',
   choice: 'all', sim: 1,
   perms: { contacts: false, notif: false, phone: false },
-  ios: { lv: true, suc: true, visited: false }, fwdCopied: false, inDialer: false, testTries: 0, tab: 'del', worry: null,
+  ios: { lv: true, suc: true, visited: false }, name: 'Ananya', num: '98765 04120', fwdCopied: false, inDialer: false, testTries: 0, tab: 'del', worry: null,
 };
 const REQUIRED = () => S.os === 'ios' ? ['contacts'] : ['contacts', 'phone'];
 
@@ -39,12 +39,13 @@ const IP = {
   bksp: '<path d="M9 5h11v14H9l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/>',
 };
 const ic = (k, sz = 20) => `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px">${IP[k]}</svg>`;
-const T = k => (COPY[S.lang][k] ?? COPY.en[k] ?? k);
+const NM = v => typeof v === 'string' ? v.replaceAll('Ananya', S.name || 'Ananya') : Array.isArray(v) ? v.map(NM) : v;
+const T = k => NM(COPY[S.lang][k] ?? COPY.en[k] ?? k);
 
 const FLOW = () => S.os === 'ios'
-  ? ['welcome', 'what', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live']
-  : ['welcome', 'what', 'choose', 'perms', 'forward', 'test', 'live'];
-const LABELS = { welcome: 'Welcome + explainer', what: 'What Sonic handles', choose: 'Choose which calls', perms: 'Permissions', voicemail: 'Turn off iPhone voicemail', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
+  ? ['welcome', 'what', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live']
+  : ['welcome', 'what', 'you', 'choose', 'perms', 'forward', 'test', 'live'];
+const LABELS = { welcome: 'Welcome + explainer', what: 'What Sonic handles', you: 'Your name', choose: 'Choose which calls', perms: 'Permissions', voicemail: 'Turn off iPhone voicemail', forward: 'Call forwarding code', test: 'Test call', live: 'Sonic is live' };
 
 // ---------- helpers ----------
 function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => toastEl.classList.remove('on'), 1600); }
@@ -98,23 +99,31 @@ screens.welcome = () => `
   </div>`;
 
 screens.what = () => {
-  const tabs = [['del', T('t_del'), ic('scooter', 16)], ['spam', T('t_spam'), ic('ban', 16)], ['fam', T('t_fam'), ic('home', 16)]];
-  const map = { del: ['del_h', 'del_p', 'del_b', 'g'], spam: ['spam_h', 'spam_p', 'spam_b', 'c'], fam: ['fam_h', 'fam_p', 'fam_b', 'a'] }[S.tab];
-  const bubbles = T(map[2]).map(([w, t]) => `<div class="bub ${w === 'Sonic' ? 'sonic' : 'caller'}"><span class="who">${w}</span>${t}</div>`).join('');
-  const worries = ['1', '3', '2b'].map(n => `<button class="chip ${S.worry === n ? 'on' : ''}" data-worry="${n}">${T('wq' + n)}</button>`).join('');
+  const jobs = [['scooter', 'g', 'del_h', 'del_b'], ['ban', 'c', 'spam_h', 'spam_b'], ['home', 'a', 'fam_h', 'fam_b']];
+  const worries = ['3', '2b'].map(n => `<button class="chip ${S.worry === n ? 'on' : ''}" data-worry="${n}">${T('wq' + n)}</button>`).join('');
   return `${appbar()}
   <div class="body">
     <h2>${T('d_title')}</h2>
-    <div class="tabs">${tabs.map(([k, l, e]) => `<button class="tab ${S.tab === k ? 'on' : ''}" data-tab="${k}">${e} ${l}</button>`).join('')}</div>
-    <div class="card">
-      <div class="row"><div class="ico ${map[3]}">${ic({ del: 'scooter', spam: 'ban', fam: 'home' }[S.tab])}</div><div><h3>${T(map[0])}</h3><p>${T(map[1])}</p></div></div>
-      <div class="bubbles">${bubbles}</div>
-    </div>
-    <p class="small" style="margin:14px 0 4px;font-weight:700;color:#E4E4EC">${T('worries_h')}</p>
-    <div class="chips">${worries}</div>
+    <p class="lede">${T('d_rings')}</p>
+    ${jobs.map(([icon, tone, h, bub]) => { const [w, t] = T(bub)[1]; const [cw, ct] = T(bub)[0]; return `<div class="job"><div class="ico ${tone}">${ic(icon)}</div><div><h3>${T(h)}</h3><p class="q"><span>${cw}:</span> ${ct}</p><p class="a"><span>${w}:</span> ${t}</p></div></div>`; }).join('')}
+    <div class="chips" style="margin-top:12px">${worries}</div>
     ${S.worry ? `<div class="tip" id="worryTip"><b>${ic('bulb', 18)} ${T('wq' + S.worry)}</b>${T('wa' + S.worry)}</div>` : ''}
   </div>
-  <div class="footer"><button class="cta" data-act="next">${T('continue')}</button></div>`;
+  <div class="footer"><button class="cta" data-act="next">${T('d_cta')}</button></div>`;
+};
+
+screens.you = () => {
+  const ios = S.os === 'ios';
+  return `${appbar()}
+  <div class="body">
+    <h2>${T('you_title')}</h2>
+    <label class="field"><span>${T('you_name')}</span><input id="youName" value="${S.name}" autocomplete="given-name" maxlength="24"></label>
+    <p class="small" style="margin:14px 0 6px">${T('you_lede')}</p>
+    <div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span><span id="youLine">${T('x_line')}</span></div>
+    ${ios ? `<label class="field" style="margin-top:18px"><span>${T('you_num')}</span><div class="numin"><b>+91</b><input id="youNum" value="${S.num}" inputmode="tel" maxlength="12"></div></label><p class="small" style="margin:6px 0 0">${T('you_num_ios')}</p>`
+      : `<div class="simrow" style="margin-top:18px">${ic('mobile', 16)} <span>${T('you_num')}: <b>98xxx x4120</b> · ${T('you_num_and')}</span></div>`}
+  </div>
+  <div class="footer"><button class="cta" data-act="next" id="youNext" ${S.name.trim() ? '' : 'disabled'}>${T('continue')}</button></div>`;
 };
 
 screens.choose = () => {
@@ -122,7 +131,7 @@ screens.choose = () => {
   const opt = (k, h, p, badge, icon) => `
     <button class="opt ${S.choice === k ? 'sel' : ''}" data-choice="${k}">
       ${badge ? `<span class="badge">${T('c_rec')}</span>` : ''}
-      <div class="row"><div class="ico ${k === 'all' ? 'p' : 'n'}">${ic(icon)}</div><div><h3>${T(h)}</h3><p>${T(p)}</p></div></div><span class="radio"></span>
+      <div class="row"><div class="ico ${k === 'all' ? 'p' : 'n'}">${ic(icon)}</div><div><h3>${T(h)}</h3><p>${T(p)}</p>${k === 'all' ? `<p class="hear">${T('c2_hear')}</p>` : ''}</div></div><span class="radio"></span>
     </button>`;
   return `${appbar()}
   <div class="body">
@@ -137,7 +146,7 @@ screens.choose = () => {
 
 screens.perms = () => {
   const list = S.os === 'ios' ? ['contacts', 'notif'] : ['contacts', 'phone', 'notif'];
-  const ico = { contacts: ['g', 'users'], notif: ['a', 'bell'], phone: ['c', 'signal'] };
+  const ico = { contacts: ['n', 'users'], notif: ['a', 'bell'], phone: ['c', 'signal'] };
   const all = REQUIRED().every(k => S.perms[k]);
   return `${appbar('perms')}
   <div class="body">
@@ -147,11 +156,11 @@ screens.perms = () => {
       ${list.map(k => `
         <div class="lrow">
           <div class="ico ${ico[k][0]}">${ic(ico[k][1])}</div>
-          <div class="t"><b>${T('r_' + k)}${k === 'notif' ? ` <small style="font-weight:600;color:#9C9CAA">· ${T('r_opt')}</small>` : ''}</b><span>${T('r_' + k + '_w')}</span></div>
+          <div class="t"><b>${T('r_' + k)}${k === 'notif' ? ` <small style="font-weight:600;color:#9C9CAA">· ${T('r_opt')}</small>` : ''}</b><span>${T(k === 'contacts' && S.choice === 'unknown' ? 'r_contacts_w2' : 'r_' + k + '_w')}</span></div>
           ${S.perms[k] ? `<span class="done-tick" aria-label="Allowed">${ic('check', 22)}</span>` : `<button class="pill-sm ${k === 'notif' ? 'ghostpill' : 'on'}" data-perm="${k}">${T('allow')}</button>`}
         </div>`).join('')}
     </div>
-    <div class="tip"><b>${ic('lock', 18)} ${'Promise'}</b>${T('r_never')}</div>
+    <div class="promise">${ic('lock', 18)}<span>${T('r_never')}</span></div>
   </div>
   <div class="footer">${all ? '' : `<p class="ctanote">${T(S.os === 'ios' ? 'r_need' : 'r_need_and')}</p>`}<button class="cta" data-act="next" ${all ? '' : 'disabled'}>${T('continue')}</button></div>`;
 };
@@ -161,12 +170,14 @@ screens.voicemail = () => `${appbar('voicemail')}
     <h2>${T('v_title')}</h2>
     <p class="lede">${T('v_lede')}</p>
     <p class="sub">${T('vm_find')}</p>
+    <p class="small" style="margin:-2px 0 8px">${T('v_how')}</p>
     <div class="iosprev">
       <div class="iosrow"><span>Live Voicemail</span><span class="sw"><i class="on"></i>${ic('chevl', 14)}<i></i></span></div>
       <p class="path">${T('v_s1p')}</p>
       <div class="iosrow"><span>Screen Unknown Callers</span><span class="val">Never</span></div>
       <p class="path">${T('v_s2p')}</p>
     </div>
+    <div class="trap">${ic('help', 18)}<span>${T('v_trap')}</span></div>
     <button class="link" data-act="vm-cant" style="padding-left:0">${T('v_cant')}</button>
   </div>
   <div class="footer">
@@ -204,7 +215,7 @@ screens.forward = () => {
       <li><p>${T('f_act')}</p></li>
     </ol>
     <div class="assure"><div>${ic('undo', 16)} ${T('f_undo')}</div><div>${ic('shield', 16)} ${T('f_down')}</div></div>
-    ${ios ? '' : `<div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>SIM ${S.sim} · ${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b></span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>`}
+    ${ios ? '' : `<div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b>. ${T('f_sim_ask')}</span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>`}
   </div>
   <div class="footer"><button class="cta" data-act="open-dialer">${ios ? T('f_open_phone') : T('f_open_dialer')}</button><button class="link helpl" data-act="help">${ic('help', 18)} ${T('help')}</button></div>`;
 };
@@ -254,7 +265,7 @@ const SCENES = [
   { art: artSpam, dur: 8 }, { art: artFamily, dur: 7 }, { art: artSetup, dur: 5 },
 ];
 const CAPS = {
-  en: ['Stuck in a meeting, phone won\'t stop ringing?', 'Sonic answers as your assistant. Never as you.', 'Lost rider? Right gate, your instructions.', 'Loan and card calls: ended politely.', 'Family: message taken, urgent ones alert you.', 'Setup takes about 2 minutes.'],
+  en: ['Stuck in a meeting, phone won\'t stop ringing?', 'Sonic answers the calls you miss. As your assistant, never as you.', 'Lost rider? The right gate, and your instructions.', 'Loan and card calls: a polite no, nothing shared.', 'Family: message taken. Urgent ones alert you.', 'Setup takes about 3 minutes.'],
 };
 let vid = null;
 function videoBlock() {
@@ -297,20 +308,34 @@ function person(x, y, skin, top, hair) { return `<g transform="translate(${x},${
 function phoneIcon(x, y, ring) { return `<g transform="translate(${x},${y})"><rect x="-14" y="-24" width="28" height="48" rx="6" fill="#151518"/><rect x="-11" y="-19" width="22" height="34" rx="3" fill="${ring ? '#F58C7E' : '#26262C'}"/>${ring ? '<path d="M18 -18 q6 6 0 12 M23 -23 q11 11 0 22" stroke="#F58C7E" stroke-width="3" fill="none" stroke-linecap="round"/>' : ''}</g>`; }
 function bubble(x, y, w, txt, fill, color) { return `<g transform="translate(${x},${y})"><rect width="${w}" height="26" rx="13" fill="${fill}"/><text x="${w / 2}" y="17" text-anchor="middle" font-family="Onest,sans-serif" font-size="11" font-weight="700" fill="${color}">${txt}</text></g>`; }
 function sonicOrb(x, y, r = 22) { return `<g transform="translate(${x},${y})"><circle r="${r + 8}" fill="#8551FF" opacity=".18"/><circle r="${r}" fill="#8551FF"/><g fill="#F6B726">${[-10, -4, 2, 8].map((dx, k) => `<rect x="${dx - 2}" y="${-[5, 9, 6, 10][k]}" width="4" height="${[10, 18, 12, 20][k]}" rx="2"/>`).join('')}</g></g>`; }
-function artMeeting() { return svg(`<rect x="40" y="110" width="240" height="14" rx="7" fill="#c9e6d2"/>${person(100, 70, '#C68B64', '#2B2245', '#2a1a12')}${person(220, 70, '#E2B48C', '#18A04B', '#3b2a1e')}${person(160, 62, '#B9784F', '#F6B726', '#1a120c')}${phoneIcon(160, 150, true)}${bubble(186, 132, 70, 'ring ring', '#fff', '#F58C7E')}`, '#DDF3E4'); }
-function artSonic() { return svg(`${phoneIcon(90, 100, true)}<path d="M112 100 H190" stroke="#8551FF" stroke-width="3" stroke-dasharray="6 6"/>${sonicOrb(220, 100, 26)}${bubble(118, 40, 186, 'Hi, this is Sonic, her assistant', '#8551FF', '#fff')}`, '#EDE6FF'); }
-function artRider() { return svg(`<rect x="0" y="140" width="320" height="60" fill="#f2d4b8"/><g transform="translate(70,120)"><circle cx="-18" cy="22" r="12" fill="#151518"/><circle cx="34" cy="22" r="12" fill="#151518"/><path d="M-18 22 L4 2 L34 22" stroke="#151518" stroke-width="5" fill="none"/><rect x="-6" y="-18" width="26" height="22" rx="4" fill="#F58C7E"/></g>${person(76, 70, '#B9784F', '#F58C7E', '#151518')}<g transform="translate(230,60)"><rect x="-30" y="0" width="60" height="80" fill="#fff" stroke="#e7c9ad"/><rect x="-10" y="50" width="20" height="30" fill="#8551FF"/><text x="0" y="-6" text-anchor="middle" font-family="Onest" font-weight="800" font-size="12" fill="#3B2E0C">GATE 2</text></g>${bubble(120, 26, 120, 'Gate 2, opp. Cult gym', '#8551FF', '#fff')}`, '#FFE9D6'); }
-function artSpam() { return svg(`${phoneIcon(110, 100, true)}${bubble(30, 30, 130, 'Pre-approved loan...', '#F58C7E', '#2b0f0b')}${sonicOrb(220, 100, 24)}${bubble(160, 150, 150, 'Not interested, thanks', '#8551FF', '#fff')}<g transform="translate(110,100)"><circle r="30" fill="none" stroke="#FF5A5F" stroke-width="5"/><path d="M-21 21 L21 -21" stroke="#FF5A5F" stroke-width="5"/></g>`, '#FFE3E3'); }
-function artFamily() { return svg(`${person(80, 80, '#C68B64', '#F6B726', '#d9d9d9')}${bubble(30, 22, 140, 'Tell her to call me', '#F58C7E', '#2b0f0b')}<path d="M110 100 H180" stroke="#8551FF" stroke-width="3" stroke-dasharray="6 6"/>${sonicOrb(205, 100, 22)}<g transform="translate(270,98)"><rect x="-26" y="-36" width="52" height="72" rx="10" fill="#151518"/><rect x="-21" y="-28" width="42" height="18" rx="5" fill="#FF5A5F"/><text x="0" y="-15" text-anchor="middle" font-family="Onest" font-weight="800" font-size="8" fill="#fff">URGENT</text><rect x="-21" y="-6" width="42" height="6" rx="3" fill="#33333B"/><rect x="-21" y="4" width="30" height="6" rx="3" fill="#33333B"/></g>`, '#FFF4CF'); }
-function artSetup() { return svg(`<g transform="translate(160,100)"><rect x="-46" y="-80" width="92" height="160" rx="16" fill="#151518"/><rect x="-36" y="-50" width="72" height="10" rx="5" fill="#2D2D33"/><rect x="-36" y="-50" width="50" height="10" rx="5" fill="#F6B726"/>${[0, 1, 2].map(k => `<g transform="translate(-30,${-22 + k * 26})"><circle r="8" fill="${k < 2 ? '#22C35E' : '#33333B'}"/><rect x="14" y="-4" width="${44 - k * 6}" height="8" rx="4" fill="#33333B"/></g>`).join('')}<rect x="-36" y="50" width="72" height="18" rx="9" fill="#22C35E"/></g><text x="250" y="105" font-family="Onest" font-weight="800" font-size="30" fill="#18A04B">2 min</text>`, '#DDF3E4'); }
+// Explainer scenes: the app's own parts (phone, Sonic orb, chat bubbles, cards) on one dark surface. No people.
+const BG = '#1A1A1F';
+function chip(x, y, w, txt, fill, color, h = 26) { return `<g transform="translate(${x},${y})"><rect width="${w}" height="${h}" rx="${h / 2}" fill="${fill}"/><text x="${w / 2}" y="${h / 2 + 4}" text-anchor="middle" font-family="Onest,sans-serif" font-size="11" font-weight="700" fill="${color}">${txt}</text></g>`; }
+function say(x, y, w, who, txt, sonic) { return `<g transform="translate(${x},${y})"><rect width="${w}" height="40" rx="12" fill="${sonic ? '#8551FF' : '#F58C7E'}"/><text x="12" y="16" font-family="Onest,sans-serif" font-size="9" font-weight="700" fill="${sonic ? '#E6DCFF' : '#5a2219'}">${who}</text><text x="12" y="31" font-family="Onest,sans-serif" font-size="11.5" font-weight="600" fill="${sonic ? '#fff' : '#2b0f0b'}">${txt}</text></g>`; }
+function card(x, y, w, h) { return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="#26262C" stroke="#33333B"/>`; }
+function glyph(x, y, k, color, sz = 18) { return `<g transform="translate(${x},${y}) scale(${sz / 24})" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${IP[k]}</g>`; }
+function artMeeting() { return svg(`${card(70, 30, 180, 140)}${glyph(88, 46, 'phone', '#F58C7E', 20)}<text x="116" y="61" font-family="Onest" font-size="12" font-weight="700" fill="#fff">Incoming call</text><text x="88" y="92" font-family="Onest" font-size="15" font-weight="800" fill="#fff">+91 70xxx x2231</text><text x="88" y="110" font-family="Onest" font-size="11" fill="#9C9CAA">Ringing for the 3rd time</text>${chip(88, 126, 144, 'You: in a meeting', '#3A2E10', '#F6B726')}`, BG); }
+function artSonic() { return svg(`${phoneIcon(70, 104, true)}<path d="M92 104 H200" stroke="#8551FF" stroke-width="3" stroke-dasharray="6 6"/>${sonicOrb(232, 104, 24)}${chip(104, 36, 196, 'Hi, this is Sonic, Ananya\'s assistant', '#8551FF', '#fff', 28)}${chip(150, 154, 120, 'Never pretends to be you', '#26262C', '#C9C9D3')}`, BG); }
+function artRider() { return svg(`${say(24, 34, 196, 'RIDER', 'Bhaiya, Palm Meadows kahan hai?', false)}${say(100, 86, 196, 'SONIC', 'Opposite Cult gym. Use Gate 2.', true)}${chip(24, 146, 150, 'Leave it with the guard', '#173524', '#9CF0BC')}${glyph(188, 150, 'scooter', '#7EE2A4', 20)}`, BG); }
+function artSpam() { return svg(`${say(24, 34, 196, 'CALLER', 'Pre-approved loan at 10.5%...', false)}${say(100, 86, 196, 'SONIC', 'Not interested, thanks.', true)}${chip(24, 146, 176, 'Spam ended · nothing shared', '#26262C', '#C9C9D3')}${glyph(208, 150, 'ban', '#FF5A5F', 20)}`, BG); }
+function artFamily() { return svg(`${say(24, 26, 196, 'AMMA', 'Ask Ananya to call me. Urgent.', false)}${say(100, 76, 196, 'SONIC', 'I\'m alerting Ananya right now.', true)}<g>${card(40, 130, 240, 50)}<rect x="52" y="141" width="28" height="28" rx="8" fill="#FF5A5F"/>${glyph(57, 146, 'bell', '#fff', 18)}<text x="90" y="152" font-family="Onest" font-size="12" font-weight="800" fill="#fff">Urgent · Amma</text><text x="90" y="168" font-family="Onest" font-size="11" fill="#C9C9D3">Call her back.</text></g>`, BG); }
+function artSetup() { return svg(`${card(60, 24, 200, 152)}${['Choose calls', 'Allow contacts', 'Dial one code', 'Test call'].map((t, k) => `<g transform="translate(78,${44 + k * 30})"><circle cx="9" cy="9" r="9" fill="#22C35E"/>${glyph(2, 2, 'check', '#fff', 14)}<text x="28" y="13" font-family="Onest" font-size="12.5" font-weight="700" fill="#fff">${t}</text></g>`).join('')}${chip(176, 150, 70, 'about 3 min', '#173524', '#9CF0BC', 22)}`, BG); }
 
 // ---------- "outside the app" scenes ----------
-function outside(html, hint) { const o = document.createElement('div'); o.className = 'outside' + (S.os === 'android' ? ' and' : ''); o.innerHTML = `<button class="breadcrumb" data-act="close-outside">${S.os === 'android' ? ic('chevl', 16) + ' Back to Sonic' : '<svg viewBox="0 0 10 10" width="8" height="8"><path d="M8 1L2 5l6 4z" fill="currentColor"/></svg> Sonic'}</button>` + html; phone.appendChild(o); phone.classList.add('out'); setHint(hint); return o; }
+// Sonic can't draw on other apps. iPhone: a Live Activity at the top. Android: an ongoing notification.
+function liveAct(items, done) {
+  return `<div class="la" role="status"><div class="la-h">${sonicMini()} ${T('la_title')}<span>${Math.min(done, items.length)}/${items.length}</span></div>${items.map((t, i) => `<div class="la-i ${i < done ? 'done' : i === done ? 'now' : ''}"><i>${i < done ? ic('check', 12) : i + 1}</i>${t}</div>`).join('')}</div>`;
+}
+function andNote(text) {
+  return `<div class="an" role="status"><div class="an-h"><span class="an-ic">${sonicMini()}</span>Sonic · ${T('la_title')} · now</div><p>${text}</p><button data-act="close-outside">${T('la_back')}</button></div>`;
+}
+function outside(html, hint) { const o = document.createElement('div'); o.className = 'outside' + (S.os === 'android' ? ' and' : ''); o.innerHTML = (S.os === 'android' ? '' : `<button class="breadcrumb" data-act="close-outside"><svg viewBox="0 0 10 10" width="8" height="8"><path d="M8 1L2 5l6 4z" fill="currentColor"/></svg> Sonic</button>`) + html; phone.appendChild(o); phone.classList.add('out'); setHint(hint); return o; }
 function closeOutside() { phone.querySelectorAll('.outside,.sysdlg').forEach(n => n.remove()); phone.classList.remove('out', 'out-light'); setHint(); render(); }
 
 function openIOSSettings() {
   const sw = (k, on) => `<button class="ios-switch ${on ? '' : 'off'}" data-ios="${k}"></button>`;
-  const o = outside(`<div class="ios-settings">
+  const done = (!S.ios.lv ? 1 : 0) + (!S.ios.suc ? 1 : 0);
+  const o = outside(`${liveAct(['Turn off Live Voicemail', 'Set Screen Unknown Callers to Never', 'Tap "Sonic" at the top left'], done === 2 ? 2 : (!S.ios.lv ? 1 : 0))}<div class="ios-settings">
     <div class="nav"><span>‹ Apps</span><b style="color:#000">Phone</b><span style="width:40px"></span></div>
     <div class="ios-group">
       <div class="ios-row">My Number <span class="val">+91 98xxx x4120</span></div>
@@ -320,22 +345,16 @@ function openIOSSettings() {
       <div class="ios-row">Call Waiting <span class="val">On ›</span></div>
     </div>
     <div class="ios-group">
-      <div class="ios-row ${S.ios.lv ? 'target' : ''}">Live Voicemail <span class="${S.ios.lv ? 'pointer' : ''}" data-tip="${'Turn off'}">${sw('lv', S.ios.lv)}</span></div>
+      <div class="ios-row ${S.ios.lv ? 'target' : ''}">Live Voicemail ${sw('lv', S.ios.lv)}</div>
     </div>
     <p class="ios-foot">Callers who reach voicemail see a live transcript on your screen.</p>
     <div class="ios-group">
       <div class="ios-row ${S.ios.suc ? 'target' : ''}">Screen Unknown Callers <span class="val">${S.ios.suc ? 'Ask Reason for Calling' : 'Never'} </span></div>
-      ${['Never', 'Ask Reason for Calling', 'Silence'].map(v => `<button class="ios-opt ${v === 'Never' && S.ios.suc ? 'pointer' : ''}" data-suc="${v}">${v}${(S.ios.suc ? 'Ask Reason for Calling' : 'Never') === v ? `<span class="tick">${ic('check', 18)}</span>` : ''}</button>`).join('')}
+      ${['Never', 'Ask Reason for Calling', 'Silence'].map(v => `<button class="ios-opt" data-suc="${v}">${v}${(S.ios.suc ? 'Ask Reason for Calling' : 'Never') === v ? `<span class="tick">${ic('check', 18)}</span>` : ''}</button>`).join('')}
     </div>
     <div class="ios-group"><div class="ios-row">Blocked Contacts <span class="val">›</span></div><div class="ios-row">SMS/Call Reporting <span class="val">›</span></div></div>
-  </div>
-  <div class="todo">
-    <div class="${S.ios.lv ? '' : 'done'}"><i>${S.ios.lv ? '1' : ic('check', 13)}</i>${'Turn off Live Voicemail'}</div>
-    <div class="${S.ios.suc ? '' : 'done'}"><i>${S.ios.suc ? '2' : ic('check', 13)}</i>${'Set Screen Unknown Callers to Never'}</div>
-    <div class="${!S.ios.lv && !S.ios.suc ? 'next' : 'later'}"><i>3</i>${'Tap "Sonic" at the top left'}</div>
   </div>`, T('hint_settings'));
   phone.classList.add('out-light');
-  if (!S.ios.lv && !S.ios.suc) $('.breadcrumb', o).classList.add('pulse-on');
   o.addEventListener('click', e => {
     const k = e.target.closest('[data-ios]'); const s = e.target.closest('[data-suc]');
     if (k) { S.ios[k.dataset.ios] = !S.ios[k.dataset.ios]; o.remove(); openIOSSettings(); }
@@ -348,15 +367,14 @@ function openDialer() {
   const ios = S.os === 'ios';
   let num = ios ? '' : FWD_CODE;
   const keys = [['1', ''], ['2', 'ABC'], ['3', 'DEF'], ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'], ['7', 'PQRS'], ['8', 'TUV'], ['9', 'WXYZ'], ['*', ''], ['0', '+'], ['#', '']];
-  const o = outside(`<div class="dialer ${ios ? 'ios' : 'android'}">
+  const o = outside(`${ios ? `<div id="laDial">${liveAct(T('la_ios_dial'), 0)}</div>` : andNote(T('la_and_dial'))}<div class="dialer ${ios ? 'ios' : 'android'}">
       <div class="dial-num" id="dialnum">${num}</div>
-      ${ios ? `<button class="paste-pop pointer" id="paste" data-tip="${T('hint_paste')}">Paste</button>` : '<div style="height:36px"></div>'}
+      ${ios ? `<button class="paste-pop" id="paste">Paste</button>` : '<div style="height:36px"></div>'}
       <div class="keys">${keys.map(([k, s]) => `<button class="key" data-k="${k}">${k}<small>${s}</small></button>`).join('')}</div>
       <div class="dialrow"><span></span><button class="callbtn" id="dial"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button><button class="bksp" id="bksp" aria-label="Delete">${ic('bksp', 26)}</button></div>
     </div>`, T('hint_dialer'));
   const disp = $('#dialnum', o);
-  const callHint = () => { $('#paste', o)?.classList.remove('pointer'); const c = $('#dial', o); c.classList.add('pointer'); c.dataset.tip = T('hint_call'); };
-  if (!ios) callHint();
+  const callHint = () => { if (ios) $('#laDial', o).innerHTML = liveAct(T('la_ios_dial'), 1); };
   o.addEventListener('click', e => {
     const k = e.target.closest('[data-k]');
     if (k) { num += k.dataset.k; disp.textContent = num; }
@@ -371,7 +389,7 @@ function openDialer() {
 function carrierResult(o) {
   const ios = S.os === 'ios';
   const c = document.createElement('div'); c.className = 'carrier';
-  o.querySelectorAll('.pointer').forEach(n => n.classList.remove('pointer'));
+  if (ios && $('#laDial', o)) $('#laDial', o).innerHTML = liveAct(T('la_ios_dial'), 2);
   c.innerHTML = `<div class="box ${ios ? '' : 'android'}"><p class="small" style="margin:0 0 10px;color:#aaa">${ios ? 'Sending...' : 'USSD code running...'}</p></div>`;
   o.appendChild(c);
   setTimeout(() => {
@@ -385,10 +403,10 @@ function incomingCall() {
   const o = outside(`<div class="incoming">
     <div class="who"><p class="small" style="color:#ccc;margin:0 0 6px">${S.os === 'ios' ? 'mobile' : 'Incoming call'}</p><b>${T('x_test')}</b><span style="color:#ccc">+91 80 6912 4400</span></div>
     <div class="acts">
-      <div><button class="rbtn dec" data-act="decline"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>${T('x_dec')}</div>
-      <div><button class="rbtn acc pulse" data-act="accept"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>${T('x_acc')}</div>
+      <div><button class="rbtn dec pulse-red" data-act="decline"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>${T('x_dec')}</div>
+      <div><button class="rbtn acc" data-act="accept"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>${T('x_acc')}</div>
     </div></div>`, 'Do what you\'d do with a call you can\'t take: decline it.');
-  $('.breadcrumb', o).remove();
+  $('.breadcrumb', o)?.remove();
 }
 
 // ---------- system permission dialogs ----------
@@ -416,7 +434,7 @@ function renderNotes() {
   const n = NOTES[key];
   $('#notesBody').innerHTML = n ? `<h3>${n.h}</h3><ul>${n.b.map(x => `<li>${x}</li>`).join('')}</ul><div class="worry"><b>User worry:</b> ${n.w}</div>` : '';
   const f = FLOW(); const cur = f.indexOf(key);
-  const all = ['welcome', 'what', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live'];
+  const all = ['welcome', 'what', 'you', 'choose', 'perms', 'voicemail', 'forward', 'test', 'live'];
   $('#flowmap').innerHTML = `<div class="notes-head">Flow (${S.os === 'ios' ? 'iPhone' : 'Android'})</div><ol>${all.map((s, i) => {
     const inFlow = f.includes(s); const idx = f.indexOf(s);
     const cls = !inFlow ? 'skip' : s === key ? 'cur' : idx < cur ? 'done' : '';
@@ -428,6 +446,9 @@ function renderNotes() {
 const BGS = { welcome: '#EAF6EE', what: '#FFF1E4', choose: '#EFEAFF', perms: '#EAF6EE', voicemail: '#FFE9E6', forward: '#EFEAFF', test: '#FFF1E4', test_ok: '#EAF6EE', live: '#EAF6EE' };
 function render() {
   screen.innerHTML = screens[S.step]();
+  const yn = $('#youName');
+  if (yn) yn.oninput = () => { S.name = yn.value.trim(); $('#youLine').textContent = T('x_line'); $('#youNext').disabled = !S.name; };
+  const yu = $('#youNum'); if (yu) yu.oninput = () => { S.num = yu.value; };
   document.body.style.background = BGS[S.step] || '#EAF6EE';
   renderNotes();
   try { localStorage.setItem('sonic_proto', JSON.stringify({ os: S.os })); } catch (e) {}
@@ -444,7 +465,7 @@ phone.addEventListener('click', e => {
   switch (d.act) {
     case 'next': return nextStep();
     case 'back': return prevStep();
-    case 'later': return openSheet(`<h3 style="margin:0 0 6px">${'No problem'}</h3><p class="small" style="font-size:14px">${'We\'ll send one reminder tomorrow at 7 pm. You can start setup anytime from Home.'}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-act="close-sheet-next">${'Actually, let\'s do it now'}</button><button class="link" data-act="close-sheet">OK</button></div>`);
+    case 'later': return openSheet(`<h3 style="margin:0 0 6px">No problem</h3><p class="small" style="font-size:14px">${T('later_p')}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-act="close-sheet-next">${'Actually, let\'s do it now'}</button><button class="link" data-act="close-sheet">OK</button></div>`);
     case 'close-sheet': return closeSheet();
     case 'close-sheet-next': closeSheet(); return nextStep();
     case 'play': return playVideo();
@@ -497,7 +518,7 @@ phone.addEventListener('click', e => {
 });
 
 function showFail() { openSheet(`<h3 style="margin:0 0 10px">${T('f_fail_h')}</h3><ol class="steps">${T('f_fail').map(x => `<li><p style="margin:5px 0 0">${x}</p></li>`).join('')}</ol><div class="footer" style="padding:0"><button class="cta" data-act="close-sheet">${T('gotit')}</button></div>`); }
-function restart() { Object.assign(S, { step: 'welcome', choice: 'all', sim: 1, perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
+function restart() { Object.assign(S, { step: 'welcome', choice: 'all', sim: 1, name: 'Ananya', perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
 
 document.querySelectorAll('[data-os]').forEach(b => b.onclick = () => {
   S.os = b.dataset.os; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x === b));

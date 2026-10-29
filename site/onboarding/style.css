@@ -445,3 +445,56 @@ h2{font-size:22px;line-height:1.2;margin:0 0 8px;font-weight:800}
 .fa-line{margin-top:17px}
 .codecard{padding:14px;margin-top:10px}
 .steps.tight{margin:12px 0 10px}
+
+/* v3.2: eval fixes */
+.job{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:8px}
+.job .ico{width:38px;height:38px}
+.job h3{margin:0 0 4px;font-size:16px}
+.job p{margin:0;font-size:14px;line-height:1.35;color:#C8C8D2}
+.job p span{font-weight:700;color:#8b8b97}
+.job p.a{color:#E4E4EC;margin-top:2px}
+.job p.a span{color:#C9B6FF}
+.field{display:block}
+.field span{display:block;font-size:14px;font-weight:700;color:#D6D6DE;margin:14px 0 6px}
+.field input{width:100%;height:54px;border-radius:16px;border:1.5px solid #4a4a55;background:#0E0E11;color:#fff;font:600 18px var(--font);padding:0 14px}
+.field input:focus{outline:none;border-color:var(--purple)}
+.numin{display:flex;align-items:center;gap:8px;height:54px;border-radius:16px;border:1.5px solid #4a4a55;background:#0E0E11;padding:0 14px}
+.numin b{color:#B4B4C0}.numin input{border:0;height:50px;padding:0;background:transparent}
+.opt p.hear{margin-top:6px;color:#C9B6FF;font-size:14px}
+.badge{background:var(--purple-soft);color:#DCD0FF}
+.promise{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:16px;padding:12px 14px;color:#C8C8D2;font-size:14.5px;line-height:1.4}
+.promise svg{flex:none;color:#B4B4C0;margin-top:1px;vertical-align:0!important}
+.trap{display:flex;gap:10px;align-items:flex-start;margin-top:12px;border:1px solid #5a4a1e;background:#2a2412;border-radius:16px;padding:12px 14px;color:#F3E2B0;font-size:14.5px;line-height:1.4;font-weight:600}
+.trap svg{flex:none;vertical-align:0!important;margin-top:1px}
+.simrow span{line-height:1.35}
+/* Live Activity (iPhone) and ongoing notification (Android) */
+.la{margin:6px 10px 8px;background:#000;color:#fff;border-radius:24px;padding:12px 14px;flex:none}
+.la-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:6px}
+.la-h span{margin-left:auto;color:#8b8b97;font-size:13px}
+.la-h svg{vertical-align:0!important}
+.la-i{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#8b8b97;padding:3px 0}
+.la-i i{width:20px;height:20px;border-radius:50%;background:#2a2a2e;display:grid;place-items:center;font-style:normal;font-size:11px;flex:none}
+.la-i i svg{vertical-align:0!important}
+.la-i.done{text-decoration:line-through}.la-i.done i{background:var(--green);color:#fff}
+.la-i.now{color:#fff;font-weight:600}.la-i.now i{background:#FBE8B6;color:#3B2E0C}
+.an{margin:8px 10px;background:#2B2B31;color:#fff;border-radius:22px;padding:12px 14px;flex:none}
+.an-h{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#B4B4C0}
+.an-ic{width:20px;height:20px;border-radius:6px;background:var(--purple);display:grid;place-items:center}
+.an-ic svg{width:14px;height:14px;vertical-align:0!important}
+.an p{margin:6px 0 8px;font-size:14.5px;line-height:1.35}
+.an button{border:0;background:none;color:#A7C7FF;font-weight:700;font-size:14px;padding:4px 0}
+.outside .dialer{padding-top:6px}
+.outside .ios-settings{padding-bottom:20px}
+.outside .dial-num{margin-top:12px}
+.rbtn.pulse-red{animation:pulsered 1.4s infinite}
+@keyframes pulsered{0%{box-shadow:0 0 0 0 rgba(255,59,48,.6)}70%{box-shadow:0 0 0 18px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+.outside{background:#000}
+.phone.out-light .outside{background:#F2F2F7}
+.phone.out-light .la{margin-top:8px}
+.outside .dialer{padding:4px 20px 14px}
+.outside .dial-num{margin:8px 0 4px;min-height:34px;font-size:21px}
+.outside .paste-pop{margin-bottom:4px}
+.outside .keys{grid-template-columns:repeat(3,70px);gap:12px 22px;margin-top:8px}
+.outside .key{width:70px;height:70px;font-size:27px}
+.outside .dialrow{grid-template-columns:70px 70px 70px;gap:22px;margin-top:12px}
+.outside .callbtn{width:70px;height:70px}
