@@ -39,6 +39,7 @@ const IP = {
   bksp: '<path d="M9 5h11v14H9l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/>',
 };
 const ic = (k, sz = 20) => `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px">${IP[k]}</svg>`;
+const greet = () => T('x_intro') + ' ' + (S.rest ?? T('x_rest'));
 const NM = v => typeof v === 'string' ? v.replaceAll('Ananya', S.name || 'Ananya') : Array.isArray(v) ? v.map(NM) : v;
 const T = k => NM(COPY[S.lang][k] ?? COPY.en[k] ?? k);
 
@@ -120,7 +121,8 @@ screens.you = () => {
     <h2>${T('you_title')}</h2>
     <label class="field"><span>${T('you_name')}</span><input id="youName" value="${S.name}" autocomplete="given-name" maxlength="24"></label>
     <p class="small" style="margin:14px 0 6px">${T('you_lede')}</p>
-    <div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span><span id="youLine">${T('x_line')}</span></div>
+    <div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span><span id="youIntro">${T('x_intro')}</span> <span id="youRest">${S.rest ?? T('x_rest')}</span></div>
+    ${S.editG ? `<textarea id="gRest" class="gedit" maxlength="140" rows="3">${S.rest ?? T('x_rest')}</textarea><p class="small" style="margin:6px 0 0">${ic('lock', 13)} ${T('g_lock')}</p><button class="link gl" data-act="g-done">${T('g_done')}</button>` : `<button class="link gl" data-act="g-edit">${ic('chat', 16)} ${T('g_edit')}</button>`}
     ${ios ? `<label class="field" style="margin-top:18px"><span>${T('you_num')}</span><div class="numin"><b>+91</b><input id="youNum" value="${S.num}" inputmode="tel" maxlength="12"></div></label><p class="small" style="margin:6px 0 0">${T('you_num_ios')}</p>`
       : `<div class="simrow" style="margin-top:18px">${ic('mobile', 16)} <span>${T('you_num')}: <b>98xxx x4120</b> · ${T('you_num_and')}</span></div>`}
   </div>
@@ -234,7 +236,7 @@ screens.test_ok = () => `
     <div style="width:64px;height:64px;border-radius:20px;background:var(--green);display:grid;place-items:center;color:#fff;margin-bottom:14px">${ic('check', 34)}</div>
     <h2>${T('x_ok_h')}</h2>
     <p class="lede">${T('x_ok_p')}</p>
-    <div class="bubbles"><div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span>${T('x_line')}</div></div>
+    <div class="bubbles"><div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span>${greet()}</div></div>
     <div class="facts"><div>${ic('mobile', 18)} ${T('x_f1')}</div><div>${ic('undo', 18)} ${T('x_f2')}</div><div>${ic('bell', 18)} ${T('x_f3')}</div></div>
     
   </div>
@@ -443,7 +445,8 @@ const BGS = { welcome: '#EAF6EE', what: '#FFF1E4', choose: '#EFEAFF', perms: '#E
 function render() {
   screen.innerHTML = screens[S.step]();
   const yn = $('#youName');
-  if (yn) yn.oninput = () => { S.name = yn.value.trim(); $('#youLine').textContent = T('x_line'); $('#youNext').disabled = !S.name; };
+  if (yn) yn.oninput = () => { S.name = yn.value.trim(); $('#youIntro').textContent = T('x_intro'); if (S.rest == null) { $('#youRest').textContent = T('x_rest'); const g = $('#gRest'); if (g) g.value = T('x_rest'); } $('#youNext').disabled = !S.name; };
+  const gr = $('#gRest'); if (gr) { gr.focus(); gr.oninput = () => { S.rest = gr.value; $('#youRest').textContent = gr.value; }; }
   const yu = $('#youNum'); if (yu) yu.oninput = () => { S.num = yu.value; };
   document.body.style.background = BGS[S.step] || '#EAF6EE';
   renderNotes();
@@ -470,6 +473,8 @@ phone.addEventListener('click', e => {
     case 'watch': openSheet(`${videoBlock()}<div class="footer" style="padding:6px 0 0"><button class="link" data-act="close-video">${T('gotit')}</button></div>`); return playVideo();
     case 'close-video': stopVideo(); return closeSheet();
     case 'allow-all': { S.queue = (S.os === 'ios' ? ['contacts', 'notif'] : ['contacts', 'phone', 'notif']).filter(k => !S.perms[k]); const k = S.queue.shift(); return k && sysDialog(k); }
+    case 'g-edit': S.editG = true; return render();
+    case 'g-done': S.editG = false; if (S.rest != null && !S.rest.trim()) S.rest = null; return render();
     case 'listen': return toggleListen(t);
     case 'help': return openSheet(`<h3 style="margin:0 0 14px">${T('help_h')}</h3>
       <div class="helplist">
@@ -519,7 +524,7 @@ phone.addEventListener('click', e => {
 });
 
 function showFail() { openSheet(`<h3 style="margin:0 0 10px">${T('f_fail_h')}</h3><ol class="steps">${T('f_fail').map(x => `<li><p style="margin:5px 0 0">${x}</p></li>`).join('')}</ol><div class="footer" style="padding:0"><button class="cta" data-act="close-sheet">${T('gotit')}</button></div>`); }
-function restart() { Object.assign(S, { step: 'welcome', choice: 'all', sim: 1, name: 'Ananya', perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
+function restart() { launch(); Object.assign(S, { rest: null, editG: false, step: 'welcome', choice: 'all', sim: 1, name: 'Ananya', perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
 
 document.querySelectorAll('[data-os]').forEach(b => b.onclick = () => {
   S.os = b.dataset.os; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x === b));
@@ -540,5 +545,13 @@ if (q.get('step') && screens[q.get('step')]) S.step = q.get('step');
 if (FLOW().indexOf(S.step) > FLOW().indexOf('perms')) S.perms = { contacts: true, notif: true, phone: true };
 const tick = () => { const d = new Date(); $('#clock').textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
 tick(); setInterval(tick, 30000);
+// 1-second launch screen, as a real app shows while it loads; tap to skip
+function launch() {
+  const l = document.createElement('div'); l.className = 'launch'; l.setAttribute('aria-hidden', 'true');
+  l.innerHTML = `<div class="launch-mark"><svg viewBox="0 0 24 24" width="56" height="56"><g fill="#F6B726">${[5, 9, 13, 17].map((x, k) => `<rect x="${x}" y="${12 - [3, 6, 4, 7][k]}" width="2.6" height="${[6, 12, 8, 14][k]}" rx="1.3"/>`).join('')}</g></svg></div><b>Sonic</b><span>Your AI assistant for missed calls</span>`;
+  phone.appendChild(l); const go = () => { l.classList.add('out'); setTimeout(() => l.remove(), 400); };
+  l.onclick = go; setTimeout(go, 1000);
+}
+if (!q.get('step')) launch();
 render();
 })();

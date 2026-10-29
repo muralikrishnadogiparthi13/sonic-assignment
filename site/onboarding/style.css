@@ -564,3 +564,12 @@ h2{font-size:22px;line-height:1.2;margin:0 0 8px;font-weight:800}
 /* test screen: centre the red-button hero in the free space */
 .body:has(.hero-red){display:flex;flex-direction:column}
 .hero-red{margin:auto 0;padding:24px 0}
+.launch{position:absolute;inset:0;z-index:50;background:var(--phone);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;transition:opacity .4s}
+.launch.out{opacity:0}
+.launch-mark{width:96px;height:96px;border-radius:28px;background:var(--purple);display:grid;place-items:center;margin-bottom:6px}
+.launch b{font-size:30px;font-weight:800;letter-spacing:-.01em}
+.launch span{font-size:15px;color:#B4B4C0}
+.gedit{width:100%;margin-top:10px;border-radius:14px;border:1.5px solid var(--purple);background:#0E0E11;color:#fff;font:500 15px/1.4 var(--font);padding:10px 12px;resize:none}
+.gedit:focus{outline:none}
+.link.gl{display:inline-flex;align-items:center;gap:6px;color:#DCD0FF;padding:6px 0;font-size:14.5px}
+.link.gl svg{vertical-align:0!important}
