@@ -28,6 +28,15 @@ const IP = {
   wifi: '<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01"/>',
   mobile: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
   check: '<path d="M5 12l5 5 9-10"/>',
+  speaker: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+  stop: '<rect x="7" y="7" width="10" height="10" rx="1.5"/>',
+  chevl: '<path d="M15 5l-7 7 7 7"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01"/>',
+  chat: '<path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/>',
+  dial: '<circle cx="7" cy="6" r="1.2"/><circle cx="12" cy="6" r="1.2"/><circle cx="17" cy="6" r="1.2"/><circle cx="7" cy="11" r="1.2"/><circle cx="12" cy="11" r="1.2"/><circle cx="17" cy="11" r="1.2"/><circle cx="12" cy="16" r="1.2"/><path d="M9 20.5h6"/>',
+  msg: '<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M7 11h10M7 14h6"/>',
+  back: '<path d="M10 8L5 12l5 4"/><path d="M5 12h9a5 5 0 0 1 5 5v1"/>',
+  bksp: '<path d="M9 5h11v14H9l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/>',
 };
 const ic = (k, sz = 20) => `<svg viewBox="0 0 24 24" width="${sz}" height="${sz}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px">${IP[k]}</svg>`;
 const T = k => (COPY[S.lang][k] ?? COPY.en[k] ?? k);
@@ -42,33 +51,43 @@ function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('on'); cl
 function openSheet(html) { sheet.innerHTML = '<div class="grab"></div>' + html; sheet.classList.add('on'); backdrop.classList.add('on'); }
 function closeSheet() { sheet.classList.remove('on'); backdrop.classList.remove('on'); }
 backdrop.onclick = closeSheet;
-function go(step) { S.step = step; stopVideo(); render(); }
+function go(step) { S.step = step; stopVideo(); stopAudio(); render(); }
 function nextStep() { const f = FLOW(); go(f[Math.min(f.indexOf(S.step) + 1, f.length - 1)]); }
 function prevStep() { const f = FLOW(); go(f[Math.max(f.indexOf(S.step) - 1, 0)]); }
 function setHint(t) { $('#hint').textContent = t || 'Tap through like a real user. Buttons and toggles work.'; }
 function copyText(t) { try { navigator.clipboard && navigator.clipboard.writeText(t).catch(() => {}); } catch (e) {} }
 
-const SETUP = () => FLOW().filter(x => !['welcome', 'what', 'test', 'live'].includes(x));
-function stepKicker() {
+const SETUP = () => FLOW().filter(x => !['welcome', 'what', 'live'].includes(x));
+function appbar(clip) {
   const f = SETUP(), i = f.indexOf(S.step);
-  return S.lang === 'hi' ? `Step ${i + 1} / ${f.length}` : `Step ${i + 1} of ${f.length}`;
+  const back = `<button class="back" data-act="back" aria-label="Back">${ic('chevl', 22)}</button>`;
+  if (i < 0) return `<div class="appbar">${back}</div>`;
+  const pct = Math.round(((i + 1) / f.length) * 100);
+  const count = `<span class="count">${T('step_of').replace('{a}', i + 1).replace('{b}', f.length)}</span>`;
+  return `<div class="appbar">${back}<div class="progress"><i style="width:${pct}%"></i></div>${count}${clip ? listenBtn(clip) : ''}</div>`;
 }
-function appbar() {
-  const f = SETUP(), i = f.indexOf(S.step);
-  const pct = S.step === 'what' ? 4 : S.step === 'test' ? 100 : Math.round(((i + 1) / f.length) * 100);
-  return `<div class="appbar"><button class="back" data-act="back" aria-label="Back">‹</button><div class="progress"><i style="width:${pct}%"></i></div></div>`;
+
+function listenBtn(clip) { return `<button class="listen" data-act="listen" data-clip="${clip}">${ic('speaker', 18)}<span>${T('listen')}</span></button>`; }
+let audio = null;
+function stopAudio() { if (audio) { audio.pause(); audio = null; } document.querySelectorAll('.listen.on').forEach(b => { b.classList.remove('on'); b.innerHTML = ic('speaker', 18) + '<span>' + T('listen') + '</span>'; }); }
+function toggleListen(btn) {
+  const was = btn.classList.contains('on'); stopAudio(); if (was) return;
+  audio = new Audio(`../assets/help/${S.lang}_${btn.dataset.clip}.mp3`); audio.play().catch(() => {});
+  btn.classList.add('on'); btn.innerHTML = ic('stop', 18) + '<span>' + T('stop') + '</span>';
+  audio.onended = stopAudio;
 }
+function fwdClip() { return S.os === 'ios' ? 'forward_ios' : 'forward_and'; }
 
 // ---------- screens ----------
 const screens = {};
 
 screens.welcome = () => `
-  <div class="body" style="padding-top:26px">
-    <p class="kicker">${T('w_kicker')}</p>
+  <div class="body" style="padding-top:18px">
     <h1>${T('w_title')}</h1>
     <p class="lede">${T('w_lede')}</p>
     ${videoBlock()}
-    <div class="row" style="align-items:center;gap:10px;margin-top:2px">
+    <p class="vlen">${T('w_play')} · ${T('w_len')}</p>
+    <div class="row" style="align-items:center;gap:10px;margin-top:14px">
       <div class="ico p" style="width:34px;height:34px;border-radius:12px">${ic('shield', 18)}</div>
       <p class="small" style="margin:0">${T('w_trust')}</p>
     </div>
@@ -82,10 +101,9 @@ screens.what = () => {
   const tabs = [['del', T('t_del'), ic('scooter', 16)], ['spam', T('t_spam'), ic('ban', 16)], ['fam', T('t_fam'), ic('home', 16)]];
   const map = { del: ['del_h', 'del_p', 'del_b', 'g'], spam: ['spam_h', 'spam_p', 'spam_b', 'c'], fam: ['fam_h', 'fam_p', 'fam_b', 'a'] }[S.tab];
   const bubbles = T(map[2]).map(([w, t]) => `<div class="bub ${w === 'Sonic' ? 'sonic' : 'caller'}"><span class="who">${w}</span>${t}</div>`).join('');
-  const worries = [1, 2, 3, 4, 5].map(n => `<button class="chip ${S.worry === n ? 'on' : ''}" data-worry="${n}">${T('wq' + n)}</button>`).join('');
+  const worries = ['1', '3', '2b'].map(n => `<button class="chip ${S.worry === n ? 'on' : ''}" data-worry="${n}">${T('wq' + n)}</button>`).join('');
   return `${appbar()}
   <div class="body">
-    <p class="kicker">${T('d_kicker')}</p>
     <h2>${T('d_title')}</h2>
     <div class="tabs">${tabs.map(([k, l, e]) => `<button class="tab ${S.tab === k ? 'on' : ''}" data-tab="${k}">${e} ${l}</button>`).join('')}</div>
     <div class="card">
@@ -101,19 +119,17 @@ screens.what = () => {
 
 screens.choose = () => {
   const f = T('c_f1');
-  const opt = (k, h, p, badge) => `
+  const opt = (k, h, p, badge, icon) => `
     <button class="opt ${S.choice === k ? 'sel' : ''}" data-choice="${k}">
       ${badge ? `<span class="badge">${T('c_rec')}</span>` : ''}
-      <h3>${T(h)}</h3><p>${T(p)}</p><span class="radio"></span>
+      <div class="row"><div class="ico ${k === 'all' ? 'p' : 'n'}">${ic(icon)}</div><div><h3>${T(h)}</h3><p>${T(p)}</p></div></div><span class="radio"></span>
     </button>`;
   return `${appbar()}
   <div class="body">
-    <p class="kicker">${stepKicker()}</p>
     <h2>${T('c_title')}</h2>
     <p class="lede">${T('c_lede')}</p>
-    <div class="flowmini" style="margin:0 0 16px"><span>${ic('phone', 13)} ${f[0]}</span><span class="arr">→</span><span class="you">${f[1]}</span><span class="arr">→</span><span>${f[2]}</span><span class="arr">→</span><span class="s">${f[3]}</span></div>
-    ${opt('all', 'c2_h', 'c2_p', true)}
-    ${opt('unknown', 'c1_h', 'c1_p', false)}
+    ${opt('all', 'c2_h', 'c2_p', true, 'users')}
+    ${opt('unknown', 'c1_h', 'c1_p', false, 'help')}
     <p class="small">${T('c_change')}</p>
   </div>
   <div class="footer"><button class="cta" data-act="next">${T('continue')}</button></div>`;
@@ -123,9 +139,8 @@ screens.perms = () => {
   const list = S.os === 'ios' ? ['contacts', 'notif'] : ['contacts', 'phone', 'notif'];
   const ico = { contacts: ['g', 'users'], notif: ['a', 'bell'], phone: ['c', 'signal'] };
   const all = REQUIRED().every(k => S.perms[k]);
-  return `${appbar()}
+  return `${appbar('perms')}
   <div class="body">
-    <p class="kicker">${stepKicker()}</p>
     <h2>${T('r_title')}</h2>
     <p class="lede">${T('r_lede')}</p>
     <div class="card" style="padding:4px 16px">
@@ -133,24 +148,25 @@ screens.perms = () => {
         <div class="lrow">
           <div class="ico ${ico[k][0]}">${ic(ico[k][1])}</div>
           <div class="t"><b>${T('r_' + k)}${k === 'notif' ? ` <small style="font-weight:600;color:#9C9CAA">· ${T('r_opt')}</small>` : ''}</b><span>${T('r_' + k + '_w')}</span></div>
-          ${S.perms[k] ? '<span class="done-tick">✓</span>' : `<button class="pill-sm on" data-perm="${k}">${T('allow')}</button>`}
+          ${S.perms[k] ? `<span class="done-tick" aria-label="Allowed">${ic('check', 22)}</span>` : `<button class="pill-sm ${k === 'notif' ? 'ghostpill' : 'on'}" data-perm="${k}">${T('allow')}</button>`}
         </div>`).join('')}
     </div>
-    <div class="tip"><b>${ic('lock', 18)} ${S.lang === 'hi' ? 'Bharosa' : 'Promise'}</b>${T('r_never')}</div>
+    <div class="tip"><b>${ic('lock', 18)} ${'Promise'}</b>${T('r_never')}</div>
   </div>
-  <div class="footer"><button class="cta" data-act="next" ${all ? '' : 'disabled'}>${all ? T('continue') : T(S.os === 'ios' ? 'r_need' : 'r_need_and')}</button></div>`;
+  <div class="footer">${all ? '' : `<p class="ctanote">${T(S.os === 'ios' ? 'r_need' : 'r_need_and')}</p>`}<button class="cta" data-act="next" ${all ? '' : 'disabled'}>${T('continue')}</button></div>`;
 };
 
-screens.voicemail = () => `${appbar()}
+screens.voicemail = () => `${appbar('voicemail')}
   <div class="body">
-    <p class="kicker">${stepKicker()}</p>
     <h2>${T('v_title')}</h2>
     <p class="lede">${T('v_lede')}</p>
-    <div class="card"><div class="flowmini" style="margin:0"><span>${ic('phone', 13)} Missed call</span><span class="arr">→</span><span style="text-decoration:line-through;opacity:.6">iPhone voicemail</span><span class="arr">→</span><span class="s">Sonic</span></div></div>
-    <ol class="steps">
-      <li><b>${T('v_s1')}</b><p>${T('v_s1p')}</p></li>
-      <li><b>${T('v_s2')}</b><p>${T('v_s2p')}</p></li>
-    </ol>
+    <p class="sub">${T('vm_find')}</p>
+    <div class="iosprev">
+      <div class="iosrow"><span>Live Voicemail</span><span class="sw"><i class="on"></i>${ic('chevl', 14)}<i></i></span></div>
+      <p class="path">${T('v_s1p')}</p>
+      <div class="iosrow"><span>Screen Unknown Callers</span><span class="val">Never</span></div>
+      <p class="path">${T('v_s2p')}</p>
+    </div>
     <button class="link" data-act="vm-cant" style="padding-left:0">${T('v_cant')}</button>
   </div>
   <div class="footer">
@@ -174,35 +190,32 @@ const codeHtml = () => `**004*<b class="num">${SONIC_RAW}</b>#`;
 
 screens.forward = () => {
   const ios = S.os === 'ios';
-  return `${appbar()}
+  return `${appbar(fwdClip())}
   <div class="body">
-    <p class="kicker">${stepKicker()}</p>
     <h2>${T('f_title')}</h2>
     ${fwdAnim()}
-    <p class="lede" style="margin-top:14px">${T('f_lede')}</p>
-    <div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>SIM ${S.sim} · ${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b></span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>
-    <ol class="steps">
-      <li class="${ios && S.fwdCopied ? 'ok' : ''}"><b>${ios ? T('f_1') : T('f_1a')}</b>
-        <div class="code"><span>${codeHtml()}</span>${ios ? `<button class="copy" data-act="copy-code">${S.fwdCopied ? T('f_copied') + ' ✓' : T('f_copy')}</button>` : ''}</div>
-        <p class="small" style="margin:0">${ic('bulb', 14)} ${T('f_inside')}</p>
-      </li>
-      <li><b>${ios ? T('f_2i') : T('f_2a')}</b><p>${ios ? T('f_2ip') : T('f_2ap')}</p></li>
-      <li><b>${T('f_3')}</b><p>${T('f_3p')}</p></li>
+    <div class="codecard">
+      <p class="lede" style="margin:0 0 10px">${T('f_lede')}</p>
+      <div class="code"><span>${codeHtml()}</span></div>
+      <p class="small" style="margin:8px 0 0">${T('f_inside')}</p>
+    </div>
+    <ol class="steps tight">
+      <li><p>${T(ios ? 'f_then_i' : 'f_then_a')}</p></li>
+      <li><p>${T('f_act')}</p></li>
     </ol>
     <div class="assure"><div>${ic('undo', 16)} ${T('f_undo')}</div><div>${ic('shield', 16)} ${T('f_down')}</div></div>
-    <button class="link" data-act="fwd-help" style="padding-left:0">${T('f_help')}</button>
+    ${ios ? '' : `<div class="simrow">${ic('mobile', 16)} <span>${T('f_sim')} <b>SIM ${S.sim} · ${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b></span><button class="link" data-act="sim-toggle">${T('f_sim_change')}</button></div>`}
   </div>
-  <div class="footer"><button class="cta" data-act="open-dialer" ${S.fwdCopied || !ios ? '' : 'disabled'}>${ios ? T('f_open_phone') : T('f_open_dialer')}</button></div>`;
+  <div class="footer"><button class="cta" data-act="open-dialer">${ios ? T('f_open_phone') : T('f_open_dialer')}</button><button class="link helpl" data-act="help">${ic('help', 18)} ${T('help')}</button></div>`;
 };
 
-screens.test = () => `${appbar()}
+screens.test = () => `${appbar('test')}
   <div class="body">
-    <p class="kicker">${T('x_kicker')}</p>
     <h2>${T('x_title')}</h2>
     <p class="lede">${T('x_lede')}</p>
-    <div class="card" style="text-align:center;padding:22px">
-      <div style="width:120px;height:80px;margin:0 auto">${svg(sonicOrb(160, 100, 40), "transparent")}</div>
-      <p class="small" style="margin:8px 0 0">${S.lang === 'hi' ? 'Aapka phone: ' : 'Calling your phone: '}<b style="color:#fff">${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b></p>
+    <div class="card testcard">
+      <p class="small" style="margin:0">${'We\'ll call'} <b style="color:#fff">${S.sim === 1 ? '98xxx x4120' : '70xxx x8812'}</b>. ${T('x_hold')}</p>
+      <div class="pressred"><span class="redbtn">${ic('phone', 30)}</span><b>${T('x_press')}</b></div>
     </div>
     ${S.testTries > 0 ? `<div class="tip">${T('x_pick')}</div>` : ''}
   </div>
@@ -210,30 +223,30 @@ screens.test = () => `${appbar()}
 
 screens.test_ok = () => `
   <div class="body" style="padding-top:30px">
-    <div style="width:64px;height:64px;border-radius:20px;background:var(--green);display:grid;place-items:center;font-size:34px;color:#fff;font-weight:800;margin-bottom:14px">✓</div>
+    <div style="width:64px;height:64px;border-radius:20px;background:var(--green);display:grid;place-items:center;color:#fff;margin-bottom:14px">${ic('check', 34)}</div>
     <h2>${T('x_ok_h')}</h2>
     <p class="lede">${T('x_ok_p')}</p>
     <div class="bubbles"><div class="bub sonic" style="max-width:100%"><span class="who">Sonic</span>${T('x_line')}</div></div>
+    <div class="facts"><div>${ic('mobile', 18)} ${T('x_f1')}</div><div>${ic('undo', 18)} ${T('x_f2')}</div></div>
     
   </div>
   <div class="footer"><button class="cta" data-act="to-live">${T('x_finish')}</button></div>`;
 
 screens.live = () => `
   <div class="body" style="padding-top:26px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 6px rgba(34,195,94,.2)"></span><span class="kicker" style="margin:0;color:var(--green)">LIVE</span></div>
-    <h1>${T('l_title')}</h1>
+    <h1 class="livehead"><span class="livedot" aria-hidden="true"></span>${T('l_title')}</h1>
     <p class="lede">${T('l_lede')}</p>
-    <div class="notif urg"><div class="dot">!</div><div><b>${T('l_n1t')}</b><p>${T('l_n1b')}</p></div></div>
-    <div class="notif"><div class="dot">${ic('scooter', 16)}</div><div><b>${T('l_n2t')}</b><p>${T('l_n2b')}</p></div></div>
-    <div class="notif"><div class="dot" style="background:#3a3a42">${ic('ban', 16)}</div><div><b>${T('l_n3t')}</b><p>${T('l_n3b')}</p></div></div>
+    <div class="notif urg"><div class="dot">${ic('bell', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_n1t')}</b><p>${T('l_n1b')}</p></div></div>
+    <div class="notif"><div class="dot">${ic('scooter', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_n2t')}</b><p>${T('l_n2b')}</p></div></div>
+    <div class="notif"><div class="dot" style="background:#3a3a42">${ic('ban', 16)}</div><div><span class="ex">${T('l_ex')}</span><b>${T('l_n3t')}</b><p>${T('l_n3b')}</p></div></div>
     <p class="small" style="margin:10px 0 0"><b style="color:#fff">${S.choice === 'all' ? T('l_mode_a') : T('l_mode_u')}</b> · ${T('l_mode_c')}</p>
-    <div style="margin-top:14px;border:1px dashed #6a5aa8;border-radius:22px;padding:14px 16px;background:transparent">
+    <div class="nextcard">
       <h3 style="margin:0 0 4px;font-size:16px">${T('l_next_h')}</h3><p class="small" style="margin:0 0 12px;color:#C9C9D3">${T('l_next_p')}</p>
-      <button class="cta" style="width:100%;height:48px;font-size:15px" data-act="deliv">${T('l_next')}</button>
+      <button class="cta2" data-act="deliv">${T('l_next')}</button>
     </div>
     <p class="small">${T('l_pause')}</p>
   </div>
-  <div class="footer"><button class="link" data-act="restart">${S.lang === 'hi' ? 'Prototype dobara shuru karein' : 'Restart prototype'}</button></div>`;
+  <div class="footer"><button class="link" data-act="restart">${'Restart prototype'}</button></div>`;
 
 // ---------- explainer video (voiceover + illustrated scenes) ----------
 const SCENES = [
@@ -242,27 +255,26 @@ const SCENES = [
 ];
 const CAPS = {
   en: ['Stuck in a meeting, phone won\'t stop ringing?', 'Sonic answers as your assistant. Never as you.', 'Lost rider? Right gate, your instructions.', 'Loan and card calls: ended politely.', 'Family: message taken, urgent ones alert you.', 'Setup takes about 2 minutes.'],
-  hi: ['Meeting mein ho, phone baj raha hai?', 'Sonic aapke assistant ki tarah baat karta hai.', 'Rider bhatka? Sahi gate, aapki instructions.', 'Loan, card calls: politely mana.', 'Ghar se call: message, urgent ho toh alert.', 'Setup mein bas 2 minute.'],
 };
 let vid = null;
 function videoBlock() {
   return `<div class="video" id="video">
-    ${SCENES.map((s, i) => `<div class="vscene ${i === 0 ? 'on' : ''}" data-scene="${i}"><div class="vart">${s.art()}</div><div class="cap">${CAPS[S.lang][i]}</div></div>`).join('')}
+    ${SCENES.map((s, i) => `<div class="vscene ${i === 1 ? 'on' : ''}" data-scene="${i}"><div class="vart">${s.art()}</div><div class="cap">${CAPS.en[i]}</div></div>`).join('')}
     <i class="vbar" id="vbar"></i>
-    <button class="play" data-act="play"><span>▶ ${T('w_play')}</span></button>
+    <button class="play" data-act="play" aria-label="${T('w_play')}"><span class="pbtn"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></span></button>
   </div>`;
 }
 function stopVideo() { if (vid) { vid.audio.pause(); clearInterval(vid.timer); vid = null; } }
 function playVideo() {
   stopVideo();
   const v = $('#video'); if (!v) return;
-  $('.play', v).style.display = 'none';
+  $('.play', v).style.display = 'none'; v.classList.add('playing');
   let i = 0; const total = SCENES.length;
   vid = { audio: new Audio(), timer: null };
   const show = n => v.querySelectorAll('.vscene').forEach((el, k) => el.classList.toggle('on', k === n));
   const playScene = () => {
     if (!vid) return;
-    if (i >= total) { stopVideo(); $('#vbar').style.width = '100%'; const b = $('.play', v); b.style.display = ''; b.innerHTML = '<span>↻ Replay</span>'; return; }
+    if (i >= total) { stopVideo(); $('#vbar').style.width = '100%'; const b = $('.play', v); b.style.display = ''; b.innerHTML = '<span class="pbtn">' + ic('undo', 20) + '</span>'; return; }
     show(i);
     vid.audio.src = `../assets/vo/${S.lang}_${i + 1}.mp3`;
     vid.audio.play().catch(() => {});
@@ -286,14 +298,14 @@ function phoneIcon(x, y, ring) { return `<g transform="translate(${x},${y})"><re
 function bubble(x, y, w, txt, fill, color) { return `<g transform="translate(${x},${y})"><rect width="${w}" height="26" rx="13" fill="${fill}"/><text x="${w / 2}" y="17" text-anchor="middle" font-family="Onest,sans-serif" font-size="11" font-weight="700" fill="${color}">${txt}</text></g>`; }
 function sonicOrb(x, y, r = 22) { return `<g transform="translate(${x},${y})"><circle r="${r + 8}" fill="#8551FF" opacity=".18"/><circle r="${r}" fill="#8551FF"/><g fill="#F6B726">${[-10, -4, 2, 8].map((dx, k) => `<rect x="${dx - 2}" y="${-[5, 9, 6, 10][k]}" width="4" height="${[10, 18, 12, 20][k]}" rx="2"/>`).join('')}</g></g>`; }
 function artMeeting() { return svg(`<rect x="40" y="110" width="240" height="14" rx="7" fill="#c9e6d2"/>${person(100, 70, '#C68B64', '#2B2245', '#2a1a12')}${person(220, 70, '#E2B48C', '#18A04B', '#3b2a1e')}${person(160, 62, '#B9784F', '#F6B726', '#1a120c')}${phoneIcon(160, 150, true)}${bubble(186, 132, 70, 'ring ring', '#fff', '#F58C7E')}`, '#DDF3E4'); }
-function artSonic() { return svg(`${phoneIcon(90, 100, true)}<path d="M112 100 H190" stroke="#8551FF" stroke-width="3" stroke-dasharray="6 6"/>${sonicOrb(220, 100, 26)}${bubble(150, 40, 150, 'Hi, this is Sonic, her assistant', '#8551FF', '#fff')}`, '#EDE6FF'); }
+function artSonic() { return svg(`${phoneIcon(90, 100, true)}<path d="M112 100 H190" stroke="#8551FF" stroke-width="3" stroke-dasharray="6 6"/>${sonicOrb(220, 100, 26)}${bubble(118, 40, 186, 'Hi, this is Sonic, her assistant', '#8551FF', '#fff')}`, '#EDE6FF'); }
 function artRider() { return svg(`<rect x="0" y="140" width="320" height="60" fill="#f2d4b8"/><g transform="translate(70,120)"><circle cx="-18" cy="22" r="12" fill="#151518"/><circle cx="34" cy="22" r="12" fill="#151518"/><path d="M-18 22 L4 2 L34 22" stroke="#151518" stroke-width="5" fill="none"/><rect x="-6" y="-18" width="26" height="22" rx="4" fill="#F58C7E"/></g>${person(76, 70, '#B9784F', '#F58C7E', '#151518')}<g transform="translate(230,60)"><rect x="-30" y="0" width="60" height="80" fill="#fff" stroke="#e7c9ad"/><rect x="-10" y="50" width="20" height="30" fill="#8551FF"/><text x="0" y="-6" text-anchor="middle" font-family="Onest" font-weight="800" font-size="12" fill="#3B2E0C">GATE 2</text></g>${bubble(120, 26, 120, 'Gate 2, opp. Cult gym', '#8551FF', '#fff')}`, '#FFE9D6'); }
 function artSpam() { return svg(`${phoneIcon(110, 100, true)}${bubble(30, 30, 130, 'Pre-approved loan...', '#F58C7E', '#2b0f0b')}${sonicOrb(220, 100, 24)}${bubble(160, 150, 150, 'Not interested, thanks', '#8551FF', '#fff')}<g transform="translate(110,100)"><circle r="30" fill="none" stroke="#FF5A5F" stroke-width="5"/><path d="M-21 21 L21 -21" stroke="#FF5A5F" stroke-width="5"/></g>`, '#FFE3E3'); }
 function artFamily() { return svg(`${person(80, 80, '#C68B64', '#F6B726', '#d9d9d9')}${bubble(30, 22, 140, 'Tell her to call me', '#F58C7E', '#2b0f0b')}<path d="M110 100 H180" stroke="#8551FF" stroke-width="3" stroke-dasharray="6 6"/>${sonicOrb(205, 100, 22)}<g transform="translate(270,98)"><rect x="-26" y="-36" width="52" height="72" rx="10" fill="#151518"/><rect x="-21" y="-28" width="42" height="18" rx="5" fill="#FF5A5F"/><text x="0" y="-15" text-anchor="middle" font-family="Onest" font-weight="800" font-size="8" fill="#fff">URGENT</text><rect x="-21" y="-6" width="42" height="6" rx="3" fill="#33333B"/><rect x="-21" y="4" width="30" height="6" rx="3" fill="#33333B"/></g>`, '#FFF4CF'); }
 function artSetup() { return svg(`<g transform="translate(160,100)"><rect x="-46" y="-80" width="92" height="160" rx="16" fill="#151518"/><rect x="-36" y="-50" width="72" height="10" rx="5" fill="#2D2D33"/><rect x="-36" y="-50" width="50" height="10" rx="5" fill="#F6B726"/>${[0, 1, 2].map(k => `<g transform="translate(-30,${-22 + k * 26})"><circle r="8" fill="${k < 2 ? '#22C35E' : '#33333B'}"/><rect x="14" y="-4" width="${44 - k * 6}" height="8" rx="4" fill="#33333B"/></g>`).join('')}<rect x="-36" y="50" width="72" height="18" rx="9" fill="#22C35E"/></g><text x="250" y="105" font-family="Onest" font-weight="800" font-size="30" fill="#18A04B">2 min</text>`, '#DDF3E4'); }
 
 // ---------- "outside the app" scenes ----------
-function outside(html, hint) { const o = document.createElement('div'); o.className = 'outside' + (S.os === 'android' ? ' and' : ''); o.innerHTML = `<button class="breadcrumb" data-act="close-outside">${S.os === 'android' ? (S.lang === 'hi' ? '← Sonic pe wapas' : '← Back to Sonic') : T('back_to')}</button>` + html; phone.appendChild(o); phone.classList.add('out'); setHint(hint); return o; }
+function outside(html, hint) { const o = document.createElement('div'); o.className = 'outside' + (S.os === 'android' ? ' and' : ''); o.innerHTML = `<button class="breadcrumb" data-act="close-outside">${S.os === 'android' ? ic('chevl', 16) + ' Back to Sonic' : '<svg viewBox="0 0 10 10" width="8" height="8"><path d="M8 1L2 5l6 4z" fill="currentColor"/></svg> Sonic'}</button>` + html; phone.appendChild(o); phone.classList.add('out'); setHint(hint); return o; }
 function closeOutside() { phone.querySelectorAll('.outside,.sysdlg').forEach(n => n.remove()); phone.classList.remove('out', 'out-light'); setHint(); render(); }
 
 function openIOSSettings() {
@@ -308,18 +320,22 @@ function openIOSSettings() {
       <div class="ios-row">Call Waiting <span class="val">On ›</span></div>
     </div>
     <div class="ios-group">
-      <div class="ios-row ${S.ios.lv ? 'target' : ''}">Live Voicemail ${sw('lv', S.ios.lv)}</div>
+      <div class="ios-row ${S.ios.lv ? 'target' : ''}">Live Voicemail <span class="${S.ios.lv ? 'pointer' : ''}" data-tip="${'Turn off'}">${sw('lv', S.ios.lv)}</span></div>
     </div>
     <p class="ios-foot">Callers who reach voicemail see a live transcript on your screen.</p>
     <div class="ios-group">
       <div class="ios-row ${S.ios.suc ? 'target' : ''}">Screen Unknown Callers <span class="val">${S.ios.suc ? 'Ask Reason for Calling' : 'Never'} </span></div>
-      <div class="ios-row" style="padding:0">
-        ${['Never', 'Ask Reason for Calling', 'Silence'].map(v => `<button data-suc="${v}" style="flex:1;border:0;background:${(S.ios.suc ? 'Ask Reason for Calling' : 'Never') === v ? '#E5F0FF' : '#fff'};padding:10px 4px;font-size:12px;color:#0A84FF;font-weight:600">${v}</button>`).join('')}
-      </div>
+      ${['Never', 'Ask Reason for Calling', 'Silence'].map(v => `<button class="ios-opt ${v === 'Never' && S.ios.suc ? 'pointer' : ''}" data-suc="${v}">${v}${(S.ios.suc ? 'Ask Reason for Calling' : 'Never') === v ? `<span class="tick">${ic('check', 18)}</span>` : ''}</button>`).join('')}
     </div>
     <div class="ios-group"><div class="ios-row">Blocked Contacts <span class="val">›</span></div><div class="ios-row">SMS/Call Reporting <span class="val">›</span></div></div>
+  </div>
+  <div class="todo">
+    <div class="${S.ios.lv ? '' : 'done'}"><i>${S.ios.lv ? '1' : ic('check', 13)}</i>${'Turn off Live Voicemail'}</div>
+    <div class="${S.ios.suc ? '' : 'done'}"><i>${S.ios.suc ? '2' : ic('check', 13)}</i>${'Set Screen Unknown Callers to Never'}</div>
+    <div class="${!S.ios.lv && !S.ios.suc ? 'next' : 'later'}"><i>3</i>${'Tap "Sonic" at the top left'}</div>
   </div>`, T('hint_settings'));
   phone.classList.add('out-light');
+  if (!S.ios.lv && !S.ios.suc) $('.breadcrumb', o).classList.add('pulse-on');
   o.addEventListener('click', e => {
     const k = e.target.closest('[data-ios]'); const s = e.target.closest('[data-suc]');
     if (k) { S.ios[k.dataset.ios] = !S.ios[k.dataset.ios]; o.remove(); openIOSSettings(); }
@@ -334,18 +350,20 @@ function openDialer() {
   const keys = [['1', ''], ['2', 'ABC'], ['3', 'DEF'], ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'], ['7', 'PQRS'], ['8', 'TUV'], ['9', 'WXYZ'], ['*', ''], ['0', '+'], ['#', '']];
   const o = outside(`<div class="dialer ${ios ? 'ios' : 'android'}">
       <div class="dial-num" id="dialnum">${num}</div>
-      ${ios ? `<button class="paste-pop" id="paste">${S.fwdCopied ? 'Paste' : '(copy the code first)'}</button>` : '<div style="height:36px"></div>'}
+      ${ios ? `<button class="paste-pop pointer" id="paste" data-tip="${T('hint_paste')}">Paste</button>` : '<div style="height:36px"></div>'}
       <div class="keys">${keys.map(([k, s]) => `<button class="key" data-k="${k}">${k}<small>${s}</small></button>`).join('')}</div>
-      <div class="dialrow"><span></span><button class="callbtn" id="dial"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button><button class="bksp" id="bksp" aria-label="Delete">⌫</button></div>
+      <div class="dialrow"><span></span><button class="callbtn" id="dial"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button><button class="bksp" id="bksp" aria-label="Delete">${ic('bksp', 26)}</button></div>
     </div>`, T('hint_dialer'));
   const disp = $('#dialnum', o);
+  const callHint = () => { $('#paste', o)?.classList.remove('pointer'); const c = $('#dial', o); c.classList.add('pointer'); c.dataset.tip = T('hint_call'); };
+  if (!ios) callHint();
   o.addEventListener('click', e => {
     const k = e.target.closest('[data-k]');
     if (k) { num += k.dataset.k; disp.textContent = num; }
     if (e.target.closest('#bksp')) { num = num.slice(0, -1); disp.textContent = num; }
-    if (e.target.id === 'paste' && S.fwdCopied) { num = FWD_CODE; disp.textContent = num; }
+    if (e.target.id === 'paste' && S.fwdCopied) { num = FWD_CODE; disp.textContent = num; e.target.style.visibility = 'hidden'; callHint(); }
     if (e.target.closest('#dial')) {
-      if (num.replace(/\s/g, '') !== FWD_CODE) { toast(!num ? (S.lang === 'hi' ? 'Pehle code paste karein' : 'Paste the code first') : (S.lang === 'hi' ? 'Code match nahi hua. ⌫ se hatakar dobara paste karein' : 'Code doesn\'t match. Clear it with ⌫ and paste again')); return; }
+      if (num.replace(/\s/g, '') !== FWD_CODE) { toast(!num ? ('Paste the code first') : ('Code doesn\'t match. Clear it with Delete and paste again')); return; }
       carrierResult(o);
     }
   });
@@ -353,12 +371,13 @@ function openDialer() {
 function carrierResult(o) {
   const ios = S.os === 'ios';
   const c = document.createElement('div'); c.className = 'carrier';
+  o.querySelectorAll('.pointer').forEach(n => n.classList.remove('pointer'));
   c.innerHTML = `<div class="box ${ios ? '' : 'android'}"><p class="small" style="margin:0 0 10px;color:#aaa">${ios ? 'Sending...' : 'USSD code running...'}</p></div>`;
   o.appendChild(c);
   setTimeout(() => {
     c.innerHTML = S.sim === 2
       ? `<div class="box ${ios ? '' : 'android'}"><h4>${T('carrier_ok_t')}</h4><p>${T('fail_t')}</p><div style="text-align:${ios ? 'center' : 'right'}"><button data-act="fwd-fail">OK</button></div></div>`
-      : `<div class="box ${ios ? '' : 'android'}"><h4>${T('carrier_ok_t')}</h4><p>${T('carrier_ok_p')}</p><div style="text-align:${ios ? 'center' : 'right'}"><button data-act="fwd-done">OK</button></div></div>`;
+      : `<div class="box ${ios ? '' : 'android'}"><h4>${T('carrier_ok_t')}</h4><p>${T('carrier_ok_p').replace('activated', '<b class="act">activated</b>')}</p><div style="text-align:${ios ? 'center' : 'right'}"><button data-act="fwd-done">OK</button></div></div>`;
   }, 1300);
 }
 
@@ -368,7 +387,7 @@ function incomingCall() {
     <div class="acts">
       <div><button class="rbtn dec" data-act="decline"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>${T('x_dec')}</div>
       <div><button class="rbtn acc pulse" data-act="accept"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg></button>${T('x_acc')}</div>
-    </div></div>`, S.lang === 'hi' ? 'Asli missed call jaisa: cut kijiye.' : 'Do what you\'d do with a call you can\'t take: decline it.');
+    </div></div>`, 'Do what you\'d do with a call you can\'t take: decline it.');
   $('.breadcrumb', o).remove();
 }
 
@@ -401,7 +420,7 @@ function renderNotes() {
   $('#flowmap').innerHTML = `<div class="notes-head">Flow (${S.os === 'ios' ? 'iPhone' : 'Android'})</div><ol>${all.map((s, i) => {
     const inFlow = f.includes(s); const idx = f.indexOf(s);
     const cls = !inFlow ? 'skip' : s === key ? 'cur' : idx < cur ? 'done' : '';
-    return `<li class="${cls}"><i>${inFlow ? (idx < cur ? '✓' : idx + 1) : '–'}</i>${LABELS[s]}${!inFlow ? ' (iPhone only)' : ''}</li>`;
+    return `<li class="${cls}"><i>${inFlow ? (idx < cur ? ic('check', 13) : idx + 1) : '–'}</i>${LABELS[s]}${!inFlow ? ' (iPhone only)' : ''}</li>`;
   }).join('')}</ol>`;
 }
 
@@ -411,24 +430,36 @@ function render() {
   screen.innerHTML = screens[S.step]();
   document.body.style.background = BGS[S.step] || '#EAF6EE';
   renderNotes();
-  try { localStorage.setItem('sonic_proto', JSON.stringify({ os: S.os, lang: S.lang })); } catch (e) {}
+  try { localStorage.setItem('sonic_proto', JSON.stringify({ os: S.os })); } catch (e) {}
 }
 
 phone.addEventListener('click', e => {
-  const t = e.target.closest('[data-act],[data-tab],[data-worry],[data-choice],[data-sim],[data-net],[data-perm]');
+  const t = e.target.closest('[data-act],[data-tab],[data-worry],[data-choice],[data-perm]');
   if (!t) return;
   const d = t.dataset;
   if (d.tab) { S.tab = d.tab; return render(); }
-  if (d.worry) { S.worry = S.worry === +d.worry ? null : +d.worry; render(); const tip = $('#worryTip'); if (tip) tip.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; }
+  if (d.worry) { S.worry = S.worry === d.worry ? null : d.worry; render(); const tip = $('#worryTip'); if (tip) tip.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; }
   if (d.choice) { S.choice = d.choice; return render(); }
   if (d.perm) { closeSheet(); return sysDialog(d.perm); }
   switch (d.act) {
     case 'next': return nextStep();
     case 'back': return prevStep();
-    case 'later': return openSheet(`<h3 style="margin:0 0 6px">${S.lang === 'hi' ? 'Koi baat nahi' : 'No problem'}</h3><p class="small" style="font-size:14px">${S.lang === 'hi' ? 'Hum kal shaam 7 baje ek reminder bhejenge. Setup kabhi bhi Home se shuru kar sakte hain.' : 'We\'ll send one reminder tomorrow at 7 pm. You can start setup anytime from Home.'}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-act="close-sheet-next">${S.lang === 'hi' ? 'Nahi, abhi kar leta hoon' : 'Actually, let\'s do it now'}</button><button class="link" data-act="close-sheet">OK</button></div>`);
+    case 'later': return openSheet(`<h3 style="margin:0 0 6px">${'No problem'}</h3><p class="small" style="font-size:14px">${'We\'ll send one reminder tomorrow at 7 pm. You can start setup anytime from Home.'}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-act="close-sheet-next">${'Actually, let\'s do it now'}</button><button class="link" data-act="close-sheet">OK</button></div>`);
     case 'close-sheet': return closeSheet();
     case 'close-sheet-next': closeSheet(); return nextStep();
     case 'play': return playVideo();
+    case 'listen': return toggleListen(t);
+    case 'help': return openSheet(`<h3 style="margin:0 0 14px">${T('help_h')}</h3>
+      <div class="helplist">
+        <button class="helpbtn" data-act="help-listen">${ic('speaker', 20)} ${T('help_listen')}</button>
+        <button class="helpbtn" data-act="help-wa">${ic('chat', 20)} ${T('help_wa')}</button>
+        <button class="helpbtn" data-act="fwd-help">${ic('help', 20)} ${T('help_fail')}</button>
+      </div>
+      <p class="small" style="margin:16px 0 6px">${T('f_type')}</p>
+      <div class="bigcode">**004*<b>${SONIC_RAW}</b>#</div>
+      <div class="footer" style="padding:6px 0 0"><button class="link" data-act="close-sheet">${T('gotit')}</button></div>`);
+    case 'help-listen': { closeSheet(); const b = phone.querySelector('.listen'); return b && toggleListen(b); }
+    case 'help-wa': closeSheet(); return toast(T('help_wa_t'));
     case 'sim-toggle': S.sim = S.sim === 1 ? 2 : 1; return render();
     case 'vm-cant': return openSheet(`<p style="font-size:15px;line-height:1.45">${T('v_cant_a')}</p><div class="footer" style="padding:10px 0 0"><button class="cta" data-act="vm-skip">${T('continue')}</button></div>`);
     case 'vm-skip': closeSheet(); return nextStep();
@@ -439,14 +470,14 @@ phone.addEventListener('click', e => {
       return;
     }
     case 'fwd-yes': closeSheet(); return go('test');
-    case 'fwd-fail': S.inDialer = false; closeOutside(); return phone.querySelector('[data-act=fwd-help]')?.click();
+    case 'fwd-fail': S.inDialer = false; closeOutside(); return showFail();
+    case 'fwd-help': closeSheet(); return showFail();
     case 'open-app-settings': closeSheet(); return toast(T('r_settings_t'));
     case 'noring': return openSheet(`<h3 style="margin:0 0 10px">${T('x_noring_h')}</h3><ol class="steps">${T('x_noring_l').map(x => `<li><p style="margin:5px 0 0">${x}</p></li>`).join('')}</ol><div class="footer" style="padding:0"><button class="cta" data-act="redo-fwd">${T('x_redo')}</button><button class="link" data-act="close-sheet">${T('gotit')}</button></div>`);
     case 'redo-fwd': closeSheet(); return go(S.os === 'ios' ? 'voicemail' : 'forward');
     case 'copy-code': S.fwdCopied = true; copyText(FWD_CODE); toast(T('toast_copied')); return render();
-    case 'open-dialer': if (S.os === 'android') S.fwdCopied = true; return openDialer();
-    case 'fwd-help': closeSheet(); return openSheet(`<h3 style="margin:0 0 10px">${T('f_fail_h')}</h3><ol class="steps">${T('f_fail').map(x => `<li><p style="margin:5px 0 0">${x}</p></li>`).join('')}</ol><div class="footer" style="padding:0"><button class="cta" data-act="close-sheet">${T('gotit')}</button></div>`);
-    case 'fwd-done': S.inDialer = false; closeOutside(); toast('✓ ' + (S.lang === 'hi' ? 'Forwarding chalu' : 'Forwarding on')); return go('test');
+    case 'open-dialer': if (!S.fwdCopied) { S.fwdCopied = true; copyText(FWD_CODE); } return openDialer();
+    case 'fwd-done': S.inDialer = false; closeOutside(); toast('Forwarding is on'); return go('test');
     case 'call-me': {
       const b = t; b.disabled = true; b.textContent = T('x_ring');
       return setTimeout(incomingCall, 1200);
@@ -456,15 +487,16 @@ phone.addEventListener('click', e => {
     case 'to-live': return go('live');
     case 'restart': return restart();
     case 'deliv': return openSheet(`
-      <h3 style="margin:0 0 4px">${S.lang === 'hi' ? 'Delivery instructions' : 'Delivery instructions'}</h3>
-      <p class="small" style="margin:0 0 12px">${S.lang === 'hi' ? 'Sonic yeh sirf us rider ko batata hai jiska order active hai.' : 'Sonic shares these only with the rider of an active order, for that address only.'}</p>
+      <h3 style="margin:0 0 4px">${'Delivery instructions'}</h3>
+      <p class="small" style="margin:0 0 12px">${'Sonic shares these only with the rider of an active order, for that address only.'}</p>
       <div class="card"><div class="row"><div class="ico g">${ic('home')}</div><div><h3>Home · HSR Layout</h3><p>Flat B-1203, Palm Meadows. Opp. Cult gym, Gate 2.</p><p style="margin-top:6px;color:#fff"><b>8 am to 10 pm:</b> hand it to Amma (Lakshmi) at the flat.<br><b>After 10 pm:</b> leave it with the security guard.</p></div></div></div>
       <div class="card"><div class="row"><div class="ico p">${ic('office')}</div><div><h3>Office · Bellandur</h3><p>Tranquil Tech Park, Block C. Gate 3 for bikes.</p><p style="margin-top:6px;color:#fff">Leave at Block C reception shelf. I'll pick it up from reception.</p></div></div></div>
-      <div class="tip"><b>${ic('lock', 18)} OTP</b>${S.lang === 'hi' ? 'Sonic kabhi OTP nahi batata. Rider maange toh aapko turant notification aata hai.' : 'Sonic never reads out your OTP. If a rider asks, you get a notification right away.'}</div>
+      <div class="tip"><b>${ic('lock', 18)} OTP</b>${'Sonic never reads out your OTP. If a rider asks, you get a notification right away.'}</div>
       <div class="footer" style="padding:4px 0 0"><button class="cta" data-act="close-sheet">${T('done')}</button></div>`);
   }
 });
 
+function showFail() { openSheet(`<h3 style="margin:0 0 10px">${T('f_fail_h')}</h3><ol class="steps">${T('f_fail').map(x => `<li><p style="margin:5px 0 0">${x}</p></li>`).join('')}</ol><div class="footer" style="padding:0"><button class="cta" data-act="close-sheet">${T('gotit')}</button></div>`); }
 function restart() { Object.assign(S, { step: 'welcome', choice: 'all', sim: 1, perms: { contacts: false, notif: false, phone: false }, ios: { lv: true, suc: true, visited: false }, inDialer: false, fwdCopied: false, testTries: 0, tab: 'del', worry: null }); closeSheet(); closeOutside(); }
 
 document.querySelectorAll('[data-os]').forEach(b => b.onclick = () => {
@@ -472,21 +504,15 @@ document.querySelectorAll('[data-os]').forEach(b => b.onclick = () => {
   if (!FLOW().includes(S.step) && S.step !== 'test_ok') S.step = 'perms';
   closeOutside();
 });
-document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => {
-  S.lang = b.dataset.lang; document.querySelectorAll('[data-lang]').forEach(x => x.classList.toggle('on', x === b)); stopVideo(); render();
-});
 $('#restart').onclick = restart;
 $('#toggleNotes').onclick = () => { const n = $('#notes'); n.classList.toggle('hidden'); $('#toggleNotes').textContent = n.classList.contains('hidden') ? 'Show notes' : 'Hide notes'; };
 
 // remembered phone + language, then deep links for reviewers: ?os=ios&lang=hi&step=forward
-try { const saved = JSON.parse(localStorage.getItem('sonic_proto') || '{}'); if (saved.os === 'ios') S.os = 'ios'; if (saved.lang === 'hi') S.lang = 'hi'; } catch (e) {}
+try { const saved = JSON.parse(localStorage.getItem('sonic_proto') || '{}'); if (saved.os === 'ios') S.os = 'ios'; } catch (e) {}
 document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x.dataset.os === S.os));
-document.querySelectorAll('[data-lang]').forEach(x => x.classList.toggle('on', x.dataset.lang === S.lang));
 const q = new URLSearchParams(location.search);
 if (q.get('os') === 'android') { S.os = 'android'; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x.dataset.os === 'android')); }
-if (q.get('lang') === 'en') { S.lang = 'en'; document.querySelectorAll('[data-lang]').forEach(x => x.classList.toggle('on', x.dataset.lang === 'en')); }
 if (q.get('os') === 'ios') { S.os = 'ios'; document.querySelectorAll('[data-os]').forEach(x => x.classList.toggle('on', x.dataset.os === 'ios')); }
-if (q.get('lang') === 'hi') { S.lang = 'hi'; document.querySelectorAll('[data-lang]').forEach(x => x.classList.toggle('on', x.dataset.lang === 'hi')); }
 if (q.get('step') && screens[q.get('step')]) S.step = q.get('step');
 const tick = () => { const d = new Date(); $('#clock').textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
 tick(); setInterval(tick, 30000);

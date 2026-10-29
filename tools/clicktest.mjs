@@ -29,8 +29,9 @@ try {
       await b.click('[data-act=close-outside]');
       console.log('  voicemail CTA after return:', await b.eval('document.querySelector(".footer .cta").textContent'));
       await b.click('[data-act=next]'); await log('-> forward');
-      console.log('  open-phone disabled before copy:', await b.eval('document.querySelector(".footer .cta").disabled'));
-      await b.click('[data-act=copy-code]');
+      console.log('  one-tap CTA enabled before copy:', !(await b.eval('document.querySelector(".footer .cta").disabled')));
+      await b.click('[data-act=listen]'); console.log('  listen playing:', await b.eval('!!document.querySelector(".listen.on")')); await b.click('[data-act=listen]');
+      await b.click('[data-act=help]'); console.log('  help sheet:', await b.eval('document.querySelector("#sheet.on h3")?.textContent')); await b.click('#sheetBackdrop');
     }
     // leave dialer without dialling -> prompt
     await b.click('[data-act=open-dialer]'); await b.click('[data-act=close-outside]');

@@ -3,3 +3,5 @@ node_modules/
 .DS_Store
 worker/.dev.vars
 site/_m.html
+.impeccable/
+PRODUCT.md
